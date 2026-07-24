@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Idea89_Assistant>
+            <version>1.0.0</version>
+        </Idea89_Assistant>
+    </modules>
+    <global>
+        <models>
+            <idea89_assistant>
+                <class>Idea89_Assistant_Model</class>
+            </idea89_assistant>
+        </models>
+        <blocks>
+            <idea89_assistant>
+                <class>Idea89_Assistant_Block</class>
+            </idea89_assistant>
+        </blocks>
+        <helpers>
+            <idea89_assistant>
+                <class>Idea89_Assistant_Helper</class>
+            </idea89_assistant>
+        </helpers>
+        <events>
+            <!-- Confirmed against OpenMage src/app/code/core/Mage/Catalog/Model/Product.php
+                 _eventPrefix='catalog_product' _eventObject='product' -->
+            <catalog_product_save_after>
+                <observers>
+                    <idea89_product_saved>
+                        <type>singleton</type>
+                        <class>idea89_assistant/observer</class>
+                        <method>productSaved</method>
+                    </idea89_product_saved>
+                </observers>
+            </catalog_product_save_after>
+            <!-- Confirmed against OpenMage src/app/code/core/Mage/CatalogInventory/Model/Stock/Item.php
+                 _eventPrefix='cataloginventory_stock_item' _eventObject='item' -->
+            <cataloginventory_stock_item_save_after>
+                <observers>
+                    <idea89_stock_saved>
+                        <type>singleton</type>
+                        <class>idea89_assistant/observer</class>
+                        <method>stockSaved</method>
+                    </idea89_stock_saved>
+                </observers>
+            </cataloginventory_stock_item_save_after>
+            <!-- Confirmed against OpenMage src/app/code/core/Mage/SalesRule/Model/Rule.php
+                 _eventPrefix='salesrule_rule' _eventObject='rule' -->
+            <salesrule_rule_save_after>
+                <observers>
+                    <idea89_salesrule_saved>
+                        <type>singleton</type>
+                        <class>idea89_assistant/observer</class>
+                        <method>salesRuleSaved</method>
+                    </idea89_salesrule_saved>
+                </observers>
+            </salesrule_rule_save_after>
+            <salesrule_rule_delete_after>
+                <observers>
+                    <idea89_salesrule_deleted>
+                        <type>singleton</type>
+                        <class>idea89_assistant/observer</class>
+                        <method>salesRuleSaved</method>
+                    </idea89_salesrule_deleted>
+                </observers>
+            </salesrule_rule_delete_after>
+        </events>
+    </global>
+    <crontab>
+        <jobs>
+            <idea89_daily_sync>
+                <schedule><cron_expr>0 2 * * *</cron_expr></schedule>
+                <run><model>idea89_assistant/cron::dailySync</model></run>
+            </idea89_daily_sync>
+            <idea89_drain_sync_queue>
+                <schedule><cron_expr>* * * * *</cron_expr></schedule>
+                <run><model>idea89_assistant/cron::drainSyncQueue</model></run>
+            </idea89_drain_sync_queue>
+            <idea89_sync_stock>
+                <schedule><cron_expr>0 3 * * *</cron_expr></schedule>
+                <run><model>idea89_assistant/cron::syncStock</model></run>
+            </idea89_sync_stock>
+            <idea89_sync_promos>
+                <schedule><cron_expr>*/15 * * * *</cron_expr></schedule>
+                <run><model>idea89_assistant/cron::syncPromos</model></run>
+            </idea89_sync_promos>
+        </jobs>
+    </crontab>
+    <frontend>
+        <routers>
+            <idea89>
+                <use>standard</use>
+                <args>
+                    <module>Idea89_Assistant</module>
+                    <frontName>idea89</frontName>
+                </args>
+            </idea89>
+            <idea89_locator>
+                <use>standard</use>
+                <args>
+                    <module>Idea89_Assistant</module>
+                    <frontName>store-finder</frontName>
+                </args>
+            </idea89_locator>
+        </routers>
+        <events>
+            <controller_front_init_routers>
+                <observers>
+                    <idea89_locator_router>
+                        <class>idea89_assistant/observer</class>
+                        <method>addLocatorRouter</method>
+                    </idea89_locator_router>
+                </observers>
+            </controller_front_init_routers>
+        </events>
+        <layout>
+            <updates>
+                <idea89_assistant>
+                    <file>idea89.xml</file>
+                </idea89_assistant>
+            </updates>
+        </layout>
+    </frontend>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <idea89_assistant before="Mage_Adminhtml">Idea89_Assistant_Adminhtml</idea89_assistant>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+    <default>
+        <idea89>
+            <locator>
+                <!-- All Store Locator field defaults. Merchants override
+                     these in System → Configuration → IDEA89 → Store Locator.
+                     Mirror these values in Model/LocatorConfig.php so the
+                     PHP fallback matches when Mage::getStoreConfig() returns null
+                     (e.g. on a fresh install before save). -->
+                <enabled>1</enabled>
+                <url_path>store-finder</url_path>
+                <layout></layout>
+                <page_title>Find a store</page_title>
+                <meta_description>Find your nearest store or showroom. Search by postcode or browse the map to plan your visit.</meta_description>
+                <hero_eyebrow>Showrooms</hero_eyebrow>
+                <hero_h1>Find a store near you</hero_h1>
+                <hero_subhead>Walk in, talk to a specialist, and try things before you buy. Use your postcode, share your location, or browse the map.</hero_subhead>
+                <help_heading>Can't find a store near you?</help_heading>
+                <help_body>Our team can point you to the nearest stockist, arrange a click &amp; collect, or guide you through ordering online.</help_body>
+                <help_cta_label>Get in touch</help_cta_label>
+                <help_cta_url>/contact</help_cta_url>
+            </locator>
+            <order_tracking>
+                <!-- Defaults for System → Configuration → IDEA89 → Order Tracking.
+                     Mirror these in Model/OrderTrackingConfig.php so a fresh
+                     install (before save) behaves the same as save-with-default. -->
+                <enabled>1</enabled>
+                <support_url>/contact</support_url>
+                <support_label>Contact support</support_label>
+                <max_recent_orders>3</max_recent_orders>
+                <show_tracking_button>1</show_tracking_button>
+            </order_tracking>
+        </idea89>
+    </default>
+</config>

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 4K Technologies Ltd. All rights reserved.
+ * See LICENSE file for license details.
+ *
+ * Uses the `before_body_end` handle which is rendered by every page layout
+ * template in the rwd/default theme (1column, 2columns-left, 2columns-right,
+ * 3columns, popup, empty). Verified against OpenMage rwd/default templates.
+ * If a custom theme omits `getChildHtml('before_body_end')` the fallback
+ * would be `<reference name="footer">`.
+ */
+-->
+<layout version="0.1.0">
+    <default>
+        <reference name="before_body_end">
+            <block type="idea89_assistant/widget" name="idea89.widget" template="idea89/widget.phtml"/>
+        </reference>
+    </default>
+    <idea89_locator_index_index>
+        <reference name="content">
+            <block type="idea89_assistant/locator" name="idea89.locator" template="idea89/locator.phtml"/>
+        </reference>
+    </idea89_locator_index_index>
+    <idea89_product_mini>
+        <!-- Detection marker checked by the widget (widget throws if absent). -->
+        <reference name="root">
+            <action method="addBodyClass"><className>idea89-mini-pdp</className></action>
+        </reference>
+        <!-- Strip site chrome; leave product-view blocks (gallery, price,
+             swatches, add-to-cart) and their JS intact. -->
+        <remove name="header"/>
+        <remove name="footer"/>
+        <remove name="breadcrumbs"/>
+        <remove name="catalog.leftnav"/>
+        <remove name="left"/>
+        <remove name="right"/>
+        <remove name="catalog.product.related"/>
+        <remove name="product.info.upsell"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="global.messages"/>
+        <remove name="catalog.compare.link"/>
+    </idea89_product_mini>
+</layout>

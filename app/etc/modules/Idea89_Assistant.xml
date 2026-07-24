@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Idea89_Assistant>
+            <active>true</active>
+            <codePool>community</codePool>
+            <depends>
+                <Mage_Catalog/>
+                <Mage_Cms/>
+                <Mage_Sales/>
+            </depends>
+        </Idea89_Assistant>
+    </modules>
+</config>

@@ -1,0 +1,61 @@
+<?php
+/**
+ * Copyright © 4K Technologies Ltd. All rights reserved.
+ * See LICENSE file for license details.
+ *
+ * CMS-embed variant of the locator. Renders ONLY the map + list.
+ * No page chrome (no hero, no help section, no stats row). Designed to
+ * drop inside whatever CMS content the merchant has built.
+ *
+ * @var Idea89_Assistant_Block_Widget_Locator $this
+ *
+ * M2→M1 substitutions:
+ *   $block->...         → $this->...
+ *   escapeHtmlAttr(...) → escapeHtml(...)
+ *   escapeJs(...)       → jsQuoteEscape(...)
+ */
+$apiBase            = $this->escapeHtml($this->getApiBase());
+$apiKey             = $this->escapeHtml($this->getApiKey());
+$apiBaseJs          = $this->jsQuoteEscape($this->getApiBase());
+$apiKeyJs           = $this->jsQuoteEscape($this->getApiKey());
+$mapProvider        = $this->escapeHtml($this->getMapProvider());
+$mapKey             = $this->getMapKey();
+$mapKeyAttr         = $mapKey !== null ? $this->escapeHtml($mapKey) : null;
+$defaultCountry     = $this->getDefaultCountryCode();
+$defaultCountryAttr = $defaultCountry !== null ? $this->escapeHtml($defaultCountry) : null;
+$nearestCount       = (int) $this->getNearestResultsCount();
+
+$brandColor     = $this->getBrandColor();
+$brandColorAttr = $brandColor !== null ? $this->escapeHtml($brandColor) : '#0B6B47';
+?>
+<div class="idea89-locator-embed" style="--sf-accent: <?php /* @noEscape */ echo $brandColorAttr ?>; position:relative; width:100%; height:80vh; min-height:560px; background:#FBFAF6; border:1px solid color-mix(in srgb, #0E1612 9%, transparent); border-radius:18px; overflow:hidden;">
+  <idea89-locator
+    mode="standalone"
+    api-base="<?php /* @noEscape */ echo $apiBase ?>"
+    api-key="<?php /* @noEscape */ echo $apiKey ?>"
+    map-provider="<?php /* @noEscape */ echo $mapProvider ?>"
+    <?php if ($mapKeyAttr !== null): ?>map-key="<?php /* @noEscape */ echo $mapKeyAttr ?>"<?php endif; ?>
+    <?php if ($defaultCountryAttr !== null): ?>default-country-code="<?php /* @noEscape */ echo $defaultCountryAttr ?>"<?php endif; ?>
+    nearest-results-count="<?php /* @noEscape */ echo $nearestCount ?>"
+    default-radius-km="100"
+  ></idea89-locator>
+</div>
+
+<?php /* Same defer + Google adapter handling as the standalone page —
+        see template comment in locator.phtml for the no-async rationale. */ ?>
+<script type="module" src="<?php /* @noEscape */ echo $apiBase ?>/widget/v1/locator.js"></script>
+<?php if ($mapProvider === 'google'): ?>
+<script type="module" src="<?php /* @noEscape */ echo $apiBase ?>/widget/v1/locator-google.js"></script>
+<?php endif; ?>
+
+<script>
+document.querySelector('.idea89-locator-embed')?.addEventListener('locator:analytics', function (e) {
+  var detail = e.detail || {};
+  fetch('<?php /* @noEscape */ echo $apiBaseJs ?>/widget/v1/analytics', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-IDEA89-Key': '<?php /* @noEscape */ echo $apiKeyJs ?>' },
+    body: JSON.stringify({ name: detail.name, properties: detail.properties, entry_point: 'cms-widget' }),
+    keepalive: true,
+  }).catch(function () {});
+});
+</script>

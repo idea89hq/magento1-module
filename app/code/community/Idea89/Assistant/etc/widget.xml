@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 4K Technologies Ltd. All rights reserved.
+ * See LICENSE file for license details.
+ *
+ * Registers the IDEA89 Store Locator as a Magento CMS widget so merchants
+ * can insert it into any CMS page or static block via the WYSIWYG widget picker.
+ *
+ * No widget parameters — every knob the merchant has is already in
+ * System → Configuration → IDEA89 → Store Locator. Adding per-instance
+ * widget params here would create a second source of truth.
+ */
+-->
+<widgets>
+    <idea89_assistant_locator type="idea89_assistant/widget_locator"
+                              translate="name description"
+                              module="idea89_assistant">
+        <name>IDEA89 Store Locator</name>
+        <description type="desc">Embed the interactive store finder (map + search + directions) inside any CMS page or block. Reads the Store Locator settings from System → Configuration → IDEA89 → Store Locator.</description>
+    </idea89_assistant_locator>
+</widgets>

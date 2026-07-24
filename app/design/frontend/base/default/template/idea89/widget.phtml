@@ -1,0 +1,35 @@
+<?php
+/**
+ * Copyright © 4K Technologies Ltd. All rights reserved.
+ * See LICENSE file for license details.
+ *
+ * @var Idea89_Assistant_Block_Widget $this
+ */
+if (!$this->shouldRender()) {
+    return;
+}
+?>
+<?php $brandColor = $this->getBrandColor(); ?>
+<?php
+/**
+ * Expose the live session form key to the widget as window.FORM_KEY.
+ *
+ * The widget's add-to-cart posts to /checkout/cart/add, which OpenMage
+ * guards with _validateFormKey(). The widget prefers window.FORM_KEY (set
+ * fresh per request on Magento 2) and only falls back to the page's
+ * <input name="form_key">. On Magento 1 that global does not exist, and the
+ * form-key input is served STALE from the block_html cache (enabled by
+ * default), so the fallback key never matches the visitor's session and the
+ * add is rejected. This block sets no cache key, so it renders here every
+ * request with the current session's real form key — the reliable source.
+ */
+?>
+<script type="text/javascript">window.FORM_KEY = '<?php echo Mage::helper('core')->jsQuoteEscape($this->getFormKey()) ?>';
+window.__IDEA89_PLATFORM = 'magento1';</script>
+<script
+    src="<?php echo $this->escapeUrl($this->getWidgetUrl()) ?>/widget/v1/<?php echo $this->escapeUrl($this->getApiKey()) ?>.js"
+    data-key="<?php echo $this->escapeHtml($this->getApiKey()) ?>"
+    data-position="<?php echo $this->escapeHtml($this->getWidgetPosition()) ?>"
+    <?php if ($brandColor !== ''): ?>data-color="<?php echo $this->escapeHtml($brandColor) ?>"<?php endif; ?>
+    async
+></script>

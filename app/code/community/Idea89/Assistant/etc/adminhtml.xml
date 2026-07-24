@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 4K Technologies Ltd. All rights reserved.
+ * See LICENSE file for license details.
+ *
+ * Admin ACL for IDEA89 AI Shopping Assistant.
+ *
+ * In OpenMage/Magento 1, section visibility in System > Configuration is
+ * controlled here, not by a <resource> node inside system.xml (that is an
+ * M2-only convention). Adding idea89 under admin > system > config grants
+ * admins with the "System / Configuration" ACL permission access to the
+ * IDEA89 configuration section.
+ */
+-->
+<config>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <config>
+                                <children>
+                                    <idea89 translate="title" module="idea89_assistant">
+                                        <title>IDEA89 — AI Shopping Assistant</title>
+                                    </idea89>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

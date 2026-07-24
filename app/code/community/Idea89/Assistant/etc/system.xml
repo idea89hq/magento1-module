@@ -1,0 +1,554 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 4K Technologies Ltd. All rights reserved.
+ * See LICENSE file for license details.
+ *
+ * System Configuration: IDEA89 AI Shopping Assistant
+ * Registers the IDEA89 tab and section with all admin-config groups.
+ *
+ * M1/OpenMage schema (config > tabs | sections) — NOT the M2 schema
+ * (config > system > tab | section). Key differences:
+ *   - <tabs> and <sections> are siblings under <config>
+ *   - Field type: <frontend_type>text</frontend_type> (not type="text" attr)
+ *   - <depends> uses the field id as the element name, not an id="" attr
+ *   - ACL is controlled by adminhtml.xml, not by <resource> nodes here
+ *   - Source/backend model aliases use factory notation (module/class_path)
+ */
+-->
+<config>
+    <!-- ── Tab ──────────────────────────────────────────────────── -->
+    <tabs>
+        <idea89 translate="label" module="idea89_assistant">
+            <label>IDEA89</label>
+            <sort_order>500</sort_order>
+        </idea89>
+    </tabs>
+
+    <!-- ── Section ──────────────────────────────────────────────── -->
+    <sections>
+        <idea89 translate="label" module="idea89_assistant">
+            <label>AI Shopping Assistant</label>
+            <tab>idea89</tab>
+            <sort_order>100</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+
+                <!-- ── About / brand strip ──────────────────────── -->
+                <!-- Always-visible banner above General: IDEA89
+                     lightbulb, tagline, version pill, and trust links.
+                     AboutFieldset overrides the standard fieldset render so
+                     the group has NO collapsible header and NO label — just
+                     the brand strip. sortOrder 0 keeps it pinned to the top. -->
+                <about translate="label">
+                    <label/>
+                    <frontend_model>idea89_assistant/adminhtml_system_config_aboutFieldset</frontend_model>
+                    <sort_order>0</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                </about>
+
+                <!-- ── General ──────────────────────────────────── -->
+                <general translate="label">
+                    <label>General</label>
+                    <sort_order>10</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label">
+                            <label>Enable Widget</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+
+                        <api_key translate="label comment">
+                            <label>API Key</label>
+                            <comment>Paste the API key from your IDEA89 merchant dashboard.</comment>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </api_key>
+
+                        <assistant_name translate="label comment">
+                            <label>Assistant Name</label>
+                            <comment>Name shown in the chat widget header, e.g. "Aria" or "Shop Helper".</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </assistant_name>
+
+                        <store_context translate="label comment">
+                            <label>Store Context</label>
+                            <comment>Describe what your store sells so the assistant can answer general questions. E.g. "We specialise in outdoor gardening tools and accessories for home and professional gardeners."</comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </store_context>
+
+                        <test_connection translate="label">
+                            <label>Test Connection</label>
+                            <frontend_model>idea89_assistant/adminhtml_system_config_testConnectionButton</frontend_model>
+                            <comment>Verifies the API key and connection to IDEA89.</comment>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </test_connection>
+
+                        <sync_now translate="label">
+                            <label>Sync Now</label>
+                            <frontend_model>idea89_assistant/adminhtml_system_config_syncNowButton</frontend_model>
+                            <comment>Pushes products, categories, and CMS pages to IDEA89. Runs automatically every night.</comment>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </sync_now>
+                    </fields>
+                </general>
+
+                <!-- ── Widget Appearance ────────────────────────── -->
+                <widget translate="label">
+                    <label>Widget Appearance</label>
+                    <sort_order>20</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <position translate="label">
+                            <label>Position</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>idea89_assistant/system_config_source_widgetPosition</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </position>
+
+                        <brand_color translate="label comment">
+                            <label>Brand Colour</label>
+                            <comment>Hex colour code, e.g. #2563eb</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-color</validate>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </brand_color>
+                    </fields>
+                </widget>
+
+                <!-- ── Content Sync ──────────────────────────────── -->
+                <sync translate="label comment">
+                    <label>Content Sync</label>
+                    <comment>Choose which content types are sent to IDEA89 to enrich the assistant's knowledge.</comment>
+                    <sort_order>25</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <sync_products translate="label comment">
+                            <label>Sync Products</label>
+                            <comment>Sync your product catalog (recommended: Yes).</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </sync_products>
+
+                        <sync_categories translate="label comment">
+                            <label>Sync Categories</label>
+                            <comment>Lets the assistant know what product categories your store has.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </sync_categories>
+
+                        <sync_cms translate="label comment">
+                            <label>Sync CMS Pages</label>
+                            <comment>Sync About Us, FAQs, contact pages etc. so the assistant can answer policy questions.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </sync_cms>
+
+                        <sync_store_info translate="label comment">
+                            <label>Sync Store Info</label>
+                            <comment>Sends store name and context description to IDEA89.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </sync_store_info>
+                    </fields>
+                </sync>
+
+                <!-- ── Store Locator ─────────────────────────────── -->
+                <locator translate="label comment">
+                    <label>Store Locator</label>
+                    <comment><![CDATA[
+<div style="padding:10px 14px;margin:0 0 6px;background:#fff8e1;border:1px solid #f4d35e;border-radius:6px;color:#5a4500;font-size:13px;line-height:1.5;">
+  <strong style="color:#7a5a00;">✨ Pro plan feature.</strong> The Store Locator is included on the <strong>Pro</strong> tier and above.
+  If you're on Starter, upgrade in your <a href="https://app.idea89.com/billing" target="_blank" rel="noopener" style="color:#5a4500;text-decoration:underline;">IDEA89 dashboard</a> to use these settings.
+</div>
+<div style="font-size:12.5px;color:#555;line-height:1.5;">
+  Online-only retailer? Set <strong>Enable Store Locator</strong> below to <em>No</em> — the page and chat-widget locator both disappear from your storefront.<br/>
+  All content fields fall back to sensible defaults when blank. Leave layout blank to inherit the global setting from your dashboard.<br/>
+  Tip: you can embed the locator inside any CMS page via the <strong>IDEA89 Store Locator</strong> widget.
+</div>
+                    ]]></comment>
+                    <sort_order>27</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enable Store Locator</label>
+                            <comment><![CDATA[
+<strong>Yes</strong> — the store finder page is live and the CMS widget renders.<br/>
+<strong>No</strong> — the page returns 404 and the CMS widget renders nothing. Pick this if you sell online only.<br/>
+<em>Note: the chat assistant only suggests showrooms if you've seeded locations in the dashboard, so online-only stores naturally never see them either way.</em>
+                            ]]></comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+
+                        <url_path translate="label comment">
+                            <label>URL Path</label>
+                            <comment><![CDATA[The URL slug for the store finder page, e.g. <code>store-finder</code>, <code>showrooms</code>, <code>stores</code>, <code>find-a-shop</code>, <code>store_locator</code>. Lowercase letters, numbers, hyphens (<code>-</code>) and underscores (<code>_</code>) only — anything else is stripped on save. Leave blank to use <code>store-finder</code>. The save will fail with a clear error if the path already belongs to a Magento module, CMS page, product, or category. <strong>Cache flush required after change.</strong>]]></comment>
+                            <!-- NO <validate> here on purpose. See the comment in M2's system.xml:
+                                 validate-code rejects hyphens (false negative — blocks legitimate
+                                 slugs like find-a-shop). The backend validator
+                                 idea89_assistant/system_config_backend_locatorUrlPath is the
+                                 single source of truth: strips disallowed characters, rejects
+                                 reserved slugs, and surfaces collisions with a named-entity error. -->
+                            <frontend_type>text</frontend_type>
+                            <backend_model>idea89_assistant/system_config_backend_locatorUrlPath</backend_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </url_path>
+
+                        <layout translate="label comment">
+                            <label>Page Layout</label>
+                            <comment>Fullwidth = edge-to-edge map (recommended); Boxed = max-width rounded card. Overrides the dashboard setting when not blank.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>idea89_assistant/system_config_source_storefinderLayout</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </layout>
+
+                        <page_title translate="label comment">
+                            <label>SEO Page Title</label>
+                            <comment>Browser tab + search-result title. Default: "Find a store".</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </page_title>
+
+                        <meta_description translate="label comment">
+                            <label>SEO Meta Description</label>
+                            <comment>Shown in search results under the page title. Aim for 140-160 characters.</comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </meta_description>
+
+                        <hero_eyebrow translate="label comment">
+                            <label>Hero Eyebrow</label>
+                            <comment>Small label above the page title, e.g. "Showrooms", "Where to buy", "Visit a branch". Default: "Showrooms".</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </hero_eyebrow>
+
+                        <hero_h1 translate="label comment">
+                            <label>Hero Title (H1)</label>
+                            <comment>Main page heading. Default: "Find a store near you".</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </hero_h1>
+
+                        <hero_subhead translate="label comment">
+                            <label>Hero Subhead</label>
+                            <comment>One-line introduction below the title.</comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </hero_subhead>
+
+                        <help_heading translate="label comment">
+                            <label>Help Section Heading</label>
+                            <comment>The heading of the help block below the map.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </help_heading>
+
+                        <help_body translate="label comment">
+                            <label>Help Section Body</label>
+                            <comment>A short paragraph offering help. Often used to mention phone support or live chat.</comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>100</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </help_body>
+
+                        <help_cta_label translate="label comment">
+                            <label>Help CTA Label</label>
+                            <comment>Button text below the help message, e.g. "Get in touch", "Contact us".</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>110</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </help_cta_label>
+
+                        <help_cta_url translate="label comment">
+                            <label>Help CTA URL</label>
+                            <comment>Where the help button links to. Can be a relative URL (/contact), an external URL, or a mailto: link.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>120</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </help_cta_url>
+                    </fields>
+                </locator>
+
+                <!-- ── Order Tracking ────────────────────────────── -->
+                <order_tracking translate="label comment">
+                    <label>Order Tracking</label>
+                    <comment><![CDATA[
+<div style="padding:10px 14px;margin:0 0 6px;background:#eef7ff;border:1px solid #b8dfff;border-radius:6px;color:#114b7a;font-size:13px;line-height:1.5;">
+  <strong style="color:#0b3a64;">Included on every plan.</strong> When a shopper asks "where is my order?" or similar, the chat assistant
+  surfaces a compact order card directly in the widget. Logged-in customers see their last few orders; guests provide an order number and email.
+</div>
+<div style="font-size:12.5px;color:#555;line-height:1.5;">
+  Order data is fetched from your Magento store directly by the shopper's browser — it never travels through the IDEA89 servers
+  or the AI model. Carrier tracking links open in a new tab. Customise the support fall-back below.
+</div>
+                    ]]></comment>
+                    <sort_order>28</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enable Order Tracking</label>
+                            <comment>When No, the assistant won't surface an order card and the order endpoints under /idea89/orders/* refuse 404.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+
+                        <support_url translate="label comment">
+                            <label>Contact Support URL</label>
+                            <comment>Where the "Contact support" button on the order card sends shoppers. Can be a path (/contact), an absolute URL, or a mailto: link. Default: /contact.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </support_url>
+
+                        <support_label translate="label comment">
+                            <label>Contact Support Button Label</label>
+                            <comment>Text on the support button. Default: "Contact support".</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </support_label>
+
+                        <max_recent_orders translate="label comment">
+                            <label>Max Recent Orders Shown</label>
+                            <comment>How many of the most recent orders to show a logged-in customer when they ask about their orders. 1-10. Default: 3.</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits</validate>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </max_recent_orders>
+
+                        <show_tracking_button translate="label comment">
+                            <label>Show Carrier Tracking Button</label>
+                            <comment>When Yes, the order card shows a "Track parcel" button that opens the carrier's tracking page in a new tab (when a carrier link is available). Set to No if you'd rather direct shoppers to the support button only.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </show_tracking_button>
+                    </fields>
+                </order_tracking>
+
+                <!-- ── Personalization ───────────────────────────── -->
+                <!-- Enable to let the assistant recognise logged-in customers.
+                     Paste the Signing Secret from your IDEA89 dashboard to
+                     activate the server-side HMAC identity handshake. -->
+                <personalization translate="label comment">
+                    <label>Personalization</label>
+                    <comment>When enabled, logged-in customers are identified to the assistant via a server-side HMAC token. Requires the Signing Secret from your IDEA89 merchant dashboard.</comment>
+                    <sort_order>29</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <enabled translate="label">
+                            <label>Enable Personalization</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </enabled>
+
+                        <signing_secret translate="label comment">
+                            <label>Signing Secret</label>
+                            <comment>Server-side HMAC secret shared with IDEA89. Never exposed to the browser.</comment>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </signing_secret>
+                    </fields>
+                </personalization>
+
+                <!-- ── Advanced ──────────────────────────────────── -->
+                <advanced translate="label">
+                    <label>Advanced</label>
+                    <sort_order>30</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <api_url translate="label comment">
+                            <label>API URL (Server-side)</label>
+                            <comment>Used for product sync from Magento to IDEA89. For local dev with Docker: http://host.docker.internal:3000</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </api_url>
+
+                        <widget_url translate="label comment">
+                            <label>Widget URL (Browser-side)</label>
+                            <comment>Used for the chat widget script tag loaded in the shopper's browser. For local dev: http://localhost:3000. Leave blank to use the API URL.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </widget_url>
+                    </fields>
+                </advanced>
+
+            </groups>
+        </idea89>
+    </sections>
+</config>

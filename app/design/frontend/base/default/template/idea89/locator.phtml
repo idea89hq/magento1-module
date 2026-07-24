@@ -1,0 +1,332 @@
+<?php
+/**
+ * Copyright © 4K Technologies Ltd. All rights reserved.
+ * See LICENSE file for license details.
+ *
+ * @var Idea89_Assistant_Block_Locator $this
+ *
+ * M2→M1 substitutions:
+ *   $block->...            → $this->...
+ *   escapeHtmlAttr(...)    → escapeHtml(...)   (OpenMage provides both; attr context is safe)
+ *   escapeJs(...)          → jsQuoteEscape(...) (escapes for single-quoted JS string context)
+ */
+$locations     = $this->getLocations();
+$apiBase       = $this->escapeHtml($this->getApiBase());
+$apiKey        = $this->escapeHtml($this->getApiKey());
+$apiBaseJs     = $this->jsQuoteEscape($this->getApiBase());
+$apiKeyJs      = $this->jsQuoteEscape($this->getApiKey());
+$mapProvider   = $this->escapeHtml($this->getMapProvider());
+$mapKey        = $this->getMapKey();
+$mapKeyAttr    = $mapKey !== null ? $this->escapeHtml($mapKey) : null;
+$defaultCountry     = $this->getDefaultCountryCode();
+$defaultCountryAttr = $defaultCountry !== null ? $this->escapeHtml($defaultCountry) : null;
+$nearestCount  = (int) $this->getNearestResultsCount();
+
+$brandColor     = $this->getBrandColor();
+$brandColorAttr = $brandColor !== null ? $this->escapeHtml($brandColor) : '#0B6B47';
+
+$layoutMode = $this->getStorefinderLayout();
+
+$cfg          = $this->getLocatorConfig();
+$heroEyebrow  = (string) $cfg->getHeroEyebrow();
+$heroH1       = (string) $cfg->getHeroH1();
+$heroSubhead  = (string) $cfg->getHeroSubhead();
+$helpHeading  = (string) $cfg->getHelpHeading();
+$helpBody     = (string) $cfg->getHelpBody();
+$helpCtaLabel = (string) $cfg->getHelpCtaLabel();
+$helpCtaUrlRaw = (string) $cfg->getHelpCtaUrl();
+$helpCtaUrlAttr = $this->escapeUrl($helpCtaUrlRaw) ?: $helpCtaUrlRaw;
+
+$storeCount   = is_array($locations) ? count($locations) : 0;
+$countries    = [];
+$cities       = [];
+foreach ($locations as $loc) {
+    $addr = is_array($loc['address'] ?? null) ? $loc['address'] : [];
+    $cc   = $addr['country_code'] ?? null;
+    if ($cc && !isset($countries[$cc])) {
+        $countries[$cc] = true;
+    }
+    $city = $addr['city'] ?? null;
+    if ($city && !isset($cities[$city])) {
+        $cities[$city] = true;
+    }
+}
+$countryCount  = count($countries);
+$cityCount     = count($cities);
+$coverageLabel = $countryCount > 1
+    ? (string) $countryCount . ' countries'
+    : (in_array('GB', array_keys($countries), true) ? 'United Kingdom' : 'In your region');
+$citiesLabel   = $cityCount > 0 ? ((string) $cityCount . ' cities') : '—';
+?>
+
+<?php foreach ($locations as $loc): ?>
+<script type="application/ld+json"><?php /* @noEscape */ echo $this->renderStoreJsonLd($loc) ?></script>
+<?php endforeach; ?>
+
+<style>
+/* ── 2026-grade store-finder page chrome ──────────────────────────
+   Hairline borders + brand-tinted hero + crafted typography. Lives
+   inline so the template ships in one file and we don't fight
+   Magento's deferred CSS pipeline. */
+.idea89-storefinder-page {
+  --sf-accent: #0B6B47;
+  --sf-ink: #0E1612;
+  --sf-canvas: #FBFAF6;
+  --sf-hairline: color-mix(in srgb, var(--sf-ink) 9%, transparent);
+  --sf-radius: 18px;
+  --sf-container: 1280px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--sf-ink);
+  font-feature-settings: 'cv11', 'ss01';
+}
+.idea89-storefinder-page[data-layout="fullwidth"] {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+.idea89-storefinder-page[data-layout="boxed"] .sf-locator-section {
+  max-width: var(--sf-container);
+  margin: -32px auto 0;
+  padding: 0 24px;
+}
+.idea89-storefinder-page[data-layout="boxed"] .idea89-locator-host {
+  border: 1px solid var(--sf-hairline);
+  border-radius: var(--sf-radius);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.5) inset,
+    0 12px 28px -10px color-mix(in srgb, var(--sf-ink) 22%, transparent),
+    0 32px 60px -20px color-mix(in srgb, var(--sf-ink) 14%, transparent);
+}
+.idea89-storefinder-page * { box-sizing: border-box; }
+
+/* ── Hero ─────────────────────────────────────────────── */
+.sf-hero {
+  background:
+    radial-gradient(ellipse at 80% -10%, color-mix(in srgb, var(--sf-accent) 12%, transparent), transparent 55%),
+    linear-gradient(180deg, color-mix(in srgb, var(--sf-accent) 5%, var(--sf-canvas)) 0%, var(--sf-canvas) 100%);
+  border-bottom: 1px solid var(--sf-hairline);
+  padding: 36px 24px 28px;
+}
+.sf-hero-inner { max-width: var(--sf-container); margin: 0 auto; }
+.sf-hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin: 0 0 14px;
+  padding: 4px 11px 4px 9px;
+  background: color-mix(in srgb, var(--sf-accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sf-accent) 22%, transparent);
+  border-radius: 999px;
+  font-size: 12px; font-weight: 600;
+  color: var(--sf-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.sf-hero-eyebrow svg { color: var(--sf-accent); }
+.sf-hero-title {
+  margin: 0 0 10px;
+  font-size: clamp(24px, 3.6vw, 36px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--sf-ink);
+  max-width: 720px;
+}
+.sf-hero-subtitle {
+  margin: 0 0 18px;
+  font-size: clamp(14px, 1.4vw, 16px);
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--sf-ink) 70%, transparent);
+  max-width: 560px;
+}
+.sf-hero-stats {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.sf-stat {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  background: var(--sf-canvas);
+  border: 1px solid var(--sf-hairline);
+  border-radius: 999px;
+  padding: 6px 14px;
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.5) inset;
+}
+.sf-stat-num {
+  font-size: 14px; font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--sf-ink);
+  font-variant-numeric: tabular-nums;
+}
+.sf-stat-label {
+  font-size: 12px;
+  color: color-mix(in srgb, var(--sf-ink) 60%, transparent);
+  font-weight: 500;
+}
+
+/* ── Locator container ────────────────────────────────── */
+.sf-locator-section {
+  position: relative;
+  width: 100%;
+  padding: 0;
+  z-index: 1;
+}
+.idea89-locator-host {
+  position: relative;
+  width: 100%;
+  height: 86vh;
+  min-height: 720px;
+  background: var(--sf-canvas);
+  overflow: hidden;
+  border-top: 1px solid var(--sf-hairline);
+}
+
+/* ── Help section ─────────────────────────────────────── */
+.sf-help { padding: 64px 24px 72px; margin-top: 24px; }
+.sf-help-inner { max-width: 820px; margin: 0 auto; text-align: center; }
+.sf-help-eyebrow {
+  display: inline-block;
+  font-size: 11.5px; font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--sf-ink) 55%, transparent);
+  margin-bottom: 12px;
+}
+.sf-help-title {
+  margin: 0 0 12px;
+  font-size: clamp(22px, 2.8vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--sf-ink);
+}
+.sf-help-subtitle {
+  margin: 0 auto 28px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--sf-ink) 68%, transparent);
+  max-width: 540px;
+}
+.sf-help-actions { display: inline-flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.sf-help-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 12px 20px;
+  background: var(--sf-accent);
+  color: white;
+  border-radius: 999px;
+  font-size: 14px; font-weight: 600;
+  text-decoration: none;
+  transition: transform 100ms ease, filter 140ms ease, box-shadow 200ms ease;
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.22) inset,
+    0 4px 14px -4px color-mix(in srgb, var(--sf-accent) 45%, transparent);
+}
+.sf-help-btn:hover { filter: brightness(1.05); text-decoration: none; }
+.sf-help-btn:active { transform: scale(0.98); }
+.sf-help-btn svg { transition: transform 140ms ease; }
+.sf-help-btn:hover svg { transform: translateX(2px); }
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sf-hero { padding: 32px 18px 28px; }
+  .sf-stat { padding: 10px 12px; }
+  .sf-stat-num { font-size: 18px; }
+  .sf-stat-label { font-size: 10px; }
+  .sf-locator-section { padding: 0 14px; margin-top: -20px; }
+  .idea89-locator-host { height: 78vh; min-height: 560px; border-radius: 14px; }
+  .sf-help { padding: 44px 18px 56px; }
+  .sf-help-actions { width: 100%; }
+  .sf-help-btn { flex: 1 1 auto; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sf-help-btn, .sf-help-btn svg { transition: none; }
+}
+</style>
+
+<div class="idea89-storefinder-page" data-layout="<?php echo $this->escapeHtml($layoutMode) ?>" style="--sf-accent: <?php /* @noEscape */ echo $brandColorAttr ?>;">
+  <header class="sf-hero">
+    <div class="sf-hero-inner">
+      <span class="sf-hero-eyebrow">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        <?php echo $this->escapeHtml($heroEyebrow) ?>
+      </span>
+      <h1 class="sf-hero-title"><?php echo $this->escapeHtml($heroH1) ?></h1>
+      <p class="sf-hero-subtitle">
+        <?php echo $this->escapeHtml($heroSubhead) ?>
+      </p>
+      <div class="sf-hero-stats" role="list" aria-label="Showroom coverage">
+        <div class="sf-stat" role="listitem">
+          <span class="sf-stat-num"><?php /* @noEscape */ echo (int) $storeCount ?></span>
+          <span class="sf-stat-label">Showrooms</span>
+        </div>
+        <div class="sf-stat" role="listitem">
+          <span class="sf-stat-num"><?php echo $this->escapeHtml($coverageLabel) ?></span>
+          <span class="sf-stat-label">Coverage</span>
+        </div>
+        <div class="sf-stat" role="listitem">
+          <span class="sf-stat-num"><?php echo $this->escapeHtml($citiesLabel) ?></span>
+          <span class="sf-stat-label">Cities</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="sf-locator-section" aria-label="Showroom map and list">
+    <div class="idea89-locator-host">
+      <idea89-locator
+        mode="standalone"
+        api-base="<?php /* @noEscape */ echo $apiBase ?>"
+        api-key="<?php /* @noEscape */ echo $apiKey ?>"
+        map-provider="<?php /* @noEscape */ echo $mapProvider ?>"
+        <?php if ($mapKeyAttr !== null): ?>map-key="<?php /* @noEscape */ echo $mapKeyAttr ?>"<?php endif; ?>
+        <?php if ($defaultCountryAttr !== null): ?>default-country-code="<?php /* @noEscape */ echo $defaultCountryAttr ?>"<?php endif; ?>
+        nearest-results-count="<?php /* @noEscape */ echo $nearestCount ?>"
+        default-radius-km="100"
+      ></idea89-locator>
+    </div>
+  </section>
+
+  <section class="sf-help" aria-labelledby="sf-help-title">
+    <div class="sf-help-inner">
+      <span class="sf-help-eyebrow">Need a hand?</span>
+      <h2 class="sf-help-title" id="sf-help-title"><?php echo $this->escapeHtml($helpHeading) ?></h2>
+      <p class="sf-help-subtitle">
+        <?php echo $this->escapeHtml($helpBody) ?>
+      </p>
+      <div class="sf-help-actions">
+        <a class="sf-help-btn" href="<?php /* @noEscape */ echo $helpCtaUrlAttr ?>">
+          <span><?php echo $this->escapeHtml($helpCtaLabel) ?></span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M13 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<?php /* NO `async` on these <script type="module"> tags: modules default to
+        deferred (run after DOM parse) AND in source order. Adding async would
+        let locator-google.js race ahead of locator.js, find globalThis.
+        __idea89LocatorRegisterGoogle still undefined, and silently fail to
+        register the Google adapter — leaving the locator on Stadia. */ ?>
+<script type="module" src="<?php /* @noEscape */ echo $apiBase ?>/widget/v1/locator.js"></script>
+<?php if ($mapProvider === 'google'): ?>
+<script type="module" src="<?php /* @noEscape */ echo $apiBase ?>/widget/v1/locator-google.js"></script>
+<?php endif; ?>
+
+<script>
+document.querySelector('.idea89-locator-host')?.addEventListener('locator:analytics', function (e) {
+  var detail = e.detail || {};
+  fetch('<?php /* @noEscape */ echo $apiBaseJs ?>/widget/v1/analytics', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-IDEA89-Key': '<?php /* @noEscape */ echo $apiKeyJs ?>' },
+    body: JSON.stringify({ name: detail.name, properties: detail.properties, entry_point: 'store-finder' }),
+    keepalive: true,
+  }).catch(function () {});
+});
+</script>
