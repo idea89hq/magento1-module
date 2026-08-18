@@ -2,7 +2,7 @@
     "name": "idea89/magento1-assistant",
     "description": "AI shopping assistant for OpenMage / Magento 1 — answers product questions, recommends what to buy, surfaces promotions. 5-minute install.",
     "type": "magento-module",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "license": "OSL-3.0",
     "homepage": "https://idea89.com",
     "authors": [

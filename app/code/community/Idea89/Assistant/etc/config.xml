@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Idea89_Assistant>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </Idea89_Assistant>
     </modules>
     <global>
