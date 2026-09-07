@@ -25,7 +25,7 @@ Turn your OpenMage or Magento 1 storefront into a conversion machine. IDEA89 add
 | **Built-in analytics** | Track conversations, conversion rates, and top queries from the merchant dashboard |
 | **GDPR-ready** | EU-hosted, no customer data used for AI training, PII redaction before model calls |
 
-Full feature parity with the Magento 2 module (v1.1.5).
+Everything listed above works the same way as it does in the Magento 2 module. The Magento 2 module additionally offers in-chat checkout and agentic commerce, which are not available for Magento 1 or OpenMage.
 
 ---
 

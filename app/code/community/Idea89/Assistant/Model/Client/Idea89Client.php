@@ -41,6 +41,37 @@ class Idea89_Assistant_Model_Client_Idea89Client
     }
 
     /**
+     * Returns the store's base path to attach as X-IDEA89-Site-Path.
+     * '/' for a root install, '/shop' for a subfolder.
+     *
+     * DO NOT change the root value back to the empty string. libcurl treats a
+     * header written as "Name: " (colon then only whitespace) as an instruction
+     * to REMOVE that header, so an empty value never reaches the API at all —
+     * and the API reads an absent header as "this plugin is too old to report a
+     * path" and lets the request through. A root store would then be able to
+     * sync into a subfolder store's catalog with the wrong API key, which is
+     * the exact mix-up this header exists to stop. '/' survives the wire, and
+     * the API's normalizeSitePath('/') returns '' — so it round-trips to the
+     * same value a root store is registered with, and still matches.
+     */
+    private function sitePath(): string
+    {
+        $baseUrl = (string) Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB, true);
+        if ($baseUrl === '') {
+            $baseUrl = (string) Mage::app()->getStore()->getBaseUrl();
+        }
+        $path = parse_url($baseUrl, PHP_URL_PATH);
+        if (!is_string($path)) {
+            return '/';
+        }
+        $path = strtolower(rtrim($path, '/'));
+        if ($path === '') {
+            return '/';
+        }
+        return substr($path, 0, 1) === '/' ? $path : '/' . $path;
+    }
+
+    /**
      * Builds a configured Varien_Http_Client ready for a JSON POST.
      */
     private function buildPostClient(string $url, string $apiKey, int $timeout): Varien_Http_Client
@@ -48,9 +79,10 @@ class Idea89_Assistant_Model_Client_Idea89Client
         $client = new Varien_Http_Client($url);
         $client->setConfig(['timeout' => $timeout]);
         $client->setHeaders([
-            'Content-Type'    => 'application/json',
-            'X-IDEA89-Key'    => $apiKey,
-            'X-IDEA89-Domain' => $this->domainHeader(),
+            'Content-Type'       => 'application/json',
+            'X-IDEA89-Key'       => $apiKey,
+            'X-IDEA89-Domain'    => $this->domainHeader(),
+            'X-IDEA89-Site-Path' => $this->sitePath(),
         ]);
         return $client;
     }
@@ -211,8 +243,9 @@ class Idea89_Assistant_Model_Client_Idea89Client
             $client = new Varien_Http_Client($url);
             $client->setConfig(['timeout' => self::TIMEOUT]);
             $client->setHeaders([
-                'X-IDEA89-Key'    => $apiKey,
-                'X-IDEA89-Domain' => $this->domainHeader(),
+                'X-IDEA89-Key'       => $apiKey,
+                'X-IDEA89-Domain'    => $this->domainHeader(),
+                'X-IDEA89-Site-Path' => $this->sitePath(),
             ]);
             $resp   = $client->request(Varien_Http_Client::GET);
             $status = $resp->getStatus();

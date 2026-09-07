@@ -82,7 +82,7 @@
 
                         <assistant_name translate="label comment">
                             <label>Assistant Name</label>
-                            <comment>Name shown in the chat widget header, e.g. "Aria" or "Shop Helper".</comment>
+                            <comment>How the assistant refers to itself when a shopper asks. The name shown in the widget header comes from your IDEA89 dashboard.</comment>
                             <frontend_type>text</frontend_type>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
@@ -217,7 +217,7 @@
   If you're on Starter, upgrade in your <a href="https://app.idea89.com/billing" target="_blank" rel="noopener" style="color:#5a4500;text-decoration:underline;">IDEA89 dashboard</a> to use these settings.
 </div>
 <div style="font-size:12.5px;color:#555;line-height:1.5;">
-  Online-only retailer? Set <strong>Enable Store Locator</strong> below to <em>No</em> — the page and chat-widget locator both disappear from your storefront.<br/>
+  Online-only retailer? Set <strong>Enable Store Locator</strong> below to <em>No</em> and the page and chat-widget locator both disappear from your storefront.<br/>
   All content fields fall back to sensible defaults when blank. Leave layout blank to inherit the global setting from your dashboard.<br/>
   Tip: you can embed the locator inside any CMS page via the <strong>IDEA89 Store Locator</strong> widget.
 </div>
@@ -230,8 +230,8 @@
                         <enabled translate="label comment">
                             <label>Enable Store Locator</label>
                             <comment><![CDATA[
-<strong>Yes</strong> — the store finder page is live and the CMS widget renders.<br/>
-<strong>No</strong> — the page returns 404 and the CMS widget renders nothing. Pick this if you sell online only.<br/>
+<strong>Yes</strong>: the store finder page is live and the CMS widget renders.<br/>
+<strong>No</strong>: the page returns 404 and the CMS widget renders nothing. Pick this if you sell online only.<br/>
 <em>Note: the chat assistant only suggests showrooms if you've seeded locations in the dashboard, so online-only stores naturally never see them either way.</em>
                             ]]></comment>
                             <frontend_type>select</frontend_type>
@@ -244,7 +244,7 @@
 
                         <url_path translate="label comment">
                             <label>URL Path</label>
-                            <comment><![CDATA[The URL slug for the store finder page, e.g. <code>store-finder</code>, <code>showrooms</code>, <code>stores</code>, <code>find-a-shop</code>, <code>store_locator</code>. Lowercase letters, numbers, hyphens (<code>-</code>) and underscores (<code>_</code>) only — anything else is stripped on save. Leave blank to use <code>store-finder</code>. The save will fail with a clear error if the path already belongs to a Magento module, CMS page, product, or category. <strong>Cache flush required after change.</strong>]]></comment>
+                            <comment><![CDATA[The URL slug for the store finder page, e.g. <code>store-finder</code>, <code>showrooms</code>, <code>stores</code>, <code>find-a-shop</code>, <code>store_locator</code>. Lowercase letters, numbers, hyphens (<code>-</code>) and underscores (<code>_</code>) only. Anything else is stripped on save. Leave blank to use <code>store-finder</code>. The save will fail with a clear error if the path already belongs to a Magento module, CMS page, product, or category. <strong>Cache flush required after change.</strong>]]></comment>
                             <!-- NO <validate> here on purpose. See the comment in M2's system.xml:
                                  validate-code rejects hyphens (false negative — blocks legitimate
                                  slugs like find-a-shop). The backend validator
@@ -404,7 +404,7 @@
   surfaces a compact order card directly in the widget. Logged-in customers see their last few orders; guests provide an order number and email.
 </div>
 <div style="font-size:12.5px;color:#555;line-height:1.5;">
-  Order data is fetched from your Magento store directly by the shopper's browser — it never travels through the IDEA89 servers
+  Order data is fetched from your Magento store directly by the shopper's browser. It never travels through the IDEA89 servers
   or the AI model. Carrier tracking links open in a new tab. Customise the support fall-back below.
 </div>
                     ]]></comment>
