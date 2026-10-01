@@ -95,10 +95,22 @@ class Idea89_Assistant_Model_Sync_CatalogSyncer
                 } else {
                     $failed += count($batch);
                     Mage::log('IDEA89: batch failed page=' . $page, Zend_Log::ERR, 'idea89.log', true);
+                    // Every later batch would be refused for the same reason.
+                    if (Idea89_Assistant_Model_Client_Idea89Client::getSyncKeyRejection() !== null) {
+                        $collection->clear();
+                        break;
+                    }
                 }
             }
 
             $collection->clear();
+        }
+
+        $rejection = Idea89_Assistant_Model_Client_Idea89Client::getSyncKeyRejection();
+        if ($rejection !== null) {
+            // Not a sync: leave "last synced" alone so the admin does not claim one happened.
+            Mage::log('IDEA89: catalog sync refused: ' . $rejection, Zend_Log::ERR, 'idea89.log', true);
+            return;
         }
 
         // Persist last sync timestamp so admin UI can show it

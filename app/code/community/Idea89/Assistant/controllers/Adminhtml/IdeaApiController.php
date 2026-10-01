@@ -101,9 +101,19 @@ class Idea89_Assistant_Adminhtml_IdeaApiController extends Mage_Adminhtml_Contro
                 $catalogSyncer->syncAll();
             }
 
-            /** @var Idea89_Assistant_Model_Sync_ContentSyncer $contentSyncer */
-            $contentSyncer = Mage::getModel('idea89_assistant/sync_contentSyncer');
-            $contentSyncer->syncAll();
+            // A refusal over the sync key during the product sync would refuse
+            // the content too; say why instead of "completed".
+            if (Idea89_Assistant_Model_Client_Idea89Client::getSyncKeyRejection() === null) {
+                /** @var Idea89_Assistant_Model_Sync_ContentSyncer $contentSyncer */
+                $contentSyncer = Mage::getModel('idea89_assistant/sync_contentSyncer');
+                $contentSyncer->syncAll();
+            }
+
+            $rejection = Idea89_Assistant_Model_Client_Idea89Client::getSyncKeyRejection();
+            if ($rejection !== null) {
+                $this->_json(['ok' => false, 'error' => $rejection]);
+                return;
+            }
 
             $this->_json(['ok' => true, 'synced' => 'completed']);
         } catch (Exception $e) {

@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-10-01
+
+### Changed
+- **The catalogue sync key is now part of setup.** Stores created in IDEA89
+  from 1 October 2026 need it before their catalogue will sync, so the field
+  is no longer marked optional. Create it in your IDEA89 dashboard under
+  API & Domains and paste it into System → Configuration → IDEA89 → General
+  → Catalogue Sync Key.
+
+### Fixed
+- **Sync Now says why a sync was refused instead of reporting success.** When
+  IDEA89 turns a sync away because the sync key is missing or out of date,
+  Sync Now shows IDEA89's explanation and the full sync stops after the first
+  refused batch, without updating "last synced".
+- **Test Connection checks the sync key too.** It now asks IDEA89 whether a
+  catalogue sync from this store would be accepted, with nothing written, and
+  reports a missing or replaced sync key straight away.
+
 ## [1.0.2] - 2026-10-01
 
 ### Added

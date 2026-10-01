@@ -75,6 +75,9 @@ class Idea89_Assistant_Model_Sync_ContentSyncer
             $ok = $client->syncContent($batch, $apiKey, $apiUrl);
             if (!$ok) {
                 Mage::log('IDEA89 ContentSyncer: batch failed', Zend_Log::ERR, 'idea89.log', true);
+                if (Idea89_Assistant_Model_Client_Idea89Client::getSyncKeyRejection() !== null) {
+                    break;
+                }
             }
         }
 

@@ -26,6 +26,56 @@ class Idea89_Assistant_Model_Client_Idea89Client
     const TIMEOUT       = 15;
     const BATCH_TIMEOUT = 60;
 
+    /** API error codes that mean "the catalogue sync key is the problem". */
+    const SYNC_KEY_ERRORS = ['sync_key_not_set', 'sync_key_required', 'invalid_sync_key'];
+
+    /**
+     * The API's merchant-facing message from the last catalogue write refused
+     * over the sync key in this request, or null. Static because Mage::getModel()
+     * hands every caller a fresh client: the syncers and the Sync Now action
+     * each have their own instance but need to see the same refusal. The write
+     * methods still only return false; observers call them during admin saves.
+     *
+     * @var string|null
+     */
+    private static $syncKeyRejection = null;
+
+    /**
+     * @return string|null
+     */
+    public static function getSyncKeyRejection()
+    {
+        return self::$syncKeyRejection;
+    }
+
+    /**
+     * The API's message when a response is a sync-key refusal, else null.
+     *
+     * @return string|null
+     */
+    public static function syncKeyErrorMessage(int $status, string $body)
+    {
+        if ($status !== 401) {
+            return null;
+        }
+        $data = json_decode($body, true);
+        if (!is_array($data) || !in_array(isset($data['error']) ? $data['error'] : null, self::SYNC_KEY_ERRORS, true)) {
+            return null;
+        }
+        $message = isset($data['message']) && is_string($data['message']) ? trim($data['message']) : '';
+        return $message !== ''
+            ? $message
+            : 'Catalogue sync was refused (' . $data['error'] . '). Check the Catalogue sync key field.';
+    }
+
+    private function noteSyncKeyRejection(int $status, string $body): void
+    {
+        $message = self::syncKeyErrorMessage($status, $body);
+        if ($message !== null) {
+            self::$syncKeyRejection = $message;
+        }
+    }
+
     /**
      * Returns the store's hostname to attach as X-IDEA89-Domain.
      * Falls back to empty string when no base URL is configured.
@@ -117,6 +167,7 @@ class Idea89_Assistant_Model_Client_Idea89Client
                     Zend_Log::ERR,
                     'idea89.log'
                 );
+                $this->noteSyncKeyRejection((int) $resp->getStatus(), (string) $resp->getBody());
                 return false;
             }
             return true;
@@ -149,6 +200,7 @@ class Idea89_Assistant_Model_Client_Idea89Client
                     Zend_Log::ERR,
                     'idea89.log'
                 );
+                $this->noteSyncKeyRejection((int) $resp->getStatus(), (string) $resp->getBody());
                 return false;
             }
             return true;
@@ -191,6 +243,7 @@ class Idea89_Assistant_Model_Client_Idea89Client
                     Zend_Log::ERR,
                     'idea89.log'
                 );
+                $this->noteSyncKeyRejection((int) $resp->getStatus(), (string) $resp->getBody());
                 return false;
             }
             return true;
@@ -226,6 +279,7 @@ class Idea89_Assistant_Model_Client_Idea89Client
                     Zend_Log::ERR,
                     'idea89.log'
                 );
+                $this->noteSyncKeyRejection((int) $resp->getStatus(), (string) $resp->getBody());
                 return false;
             }
             return true;
@@ -258,7 +312,7 @@ class Idea89_Assistant_Model_Client_Idea89Client
             $status = $resp->getStatus();
 
             if ($status === 200) {
-                return ['ok' => true];
+                return $this->verifyCatalogAccess($apiKey, $apiUrl);
             }
 
             Mage::log('IDEA89 testConnection: HTTP ' . $status, Zend_Log::ERR, 'idea89.log');
@@ -271,6 +325,38 @@ class Idea89_Assistant_Model_Client_Idea89Client
         } catch (Exception $e) {
             Mage::log('IDEA89 testConnection exception: ' . $e->getMessage(), Zend_Log::ERR, 'idea89.log');
             return ['ok' => false, 'error' => 'Connection failed: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Ask the API whether a catalogue sync from this store would be accepted
+     * (API key, store address and sync key, the same checks a real sync gets),
+     * with nothing written. /health alone cannot tell, so without this a
+     * missing sync key only showed up as an empty catalogue.
+     */
+    private function verifyCatalogAccess(string $apiKey, string $apiUrl): array
+    {
+        try {
+            $client = $this->buildPostClient(rtrim($apiUrl, '/') . '/v1/catalog/verify', $apiKey, self::TIMEOUT);
+            $client->setRawData('{}', 'application/json');
+            $resp   = $client->request(Varien_Http_Client::POST);
+            $status = (int) $resp->getStatus();
+            // 404: an API older than this module; the health check already passed.
+            if ($status === 200 || $status === 404) {
+                return ['ok' => true];
+            }
+            $body = (string) $resp->getBody();
+            Mage::log('IDEA89 catalogue access check failed: HTTP ' . $status . ' ' . substr($body, 0, 500), Zend_Log::ERR, 'idea89.log');
+            $syncKeyMessage = self::syncKeyErrorMessage($status, $body);
+            if ($syncKeyMessage !== null) {
+                return ['ok' => false, 'error' => 'Connected, but catalogue sync will be refused: ' . $syncKeyMessage];
+            }
+            $data = json_decode($body, true);
+            $code = is_array($data) && isset($data['error']) && is_string($data['error']) ? $data['error'] : (string) $status;
+            return ['ok' => false, 'error' => 'Connected, but the API refused this store (' . $code . '). Check your API key.'];
+        } catch (Exception $e) {
+            Mage::log('IDEA89 catalogue access check exception: ' . $e->getMessage(), Zend_Log::ERR, 'idea89.log');
+            return ['ok' => false, 'error' => 'Connected, but the catalogue check failed: ' . $e->getMessage()];
         }
     }
 }
