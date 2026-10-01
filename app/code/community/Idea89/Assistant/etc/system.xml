@@ -80,6 +80,17 @@
                             <show_in_store>0</show_in_store>
                         </api_key>
 
+                        <sync_key translate="label comment">
+                            <label>Catalog Sync Key (optional)</label>
+                            <comment>Optional. If you generated a catalog sync key in your IDEA89 dashboard, paste it here and it is sent with every catalog update. Leave blank if you have not generated one.</comment>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
+                            <sort_order>25</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </sync_key>
+
                         <assistant_name translate="label comment">
                             <label>Assistant Name</label>
                             <comment>How the assistant refers to itself when a shopper asks. The name shown in the widget header comes from your IDEA89 dashboard.</comment>

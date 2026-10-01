@@ -122,8 +122,10 @@ class Idea89_Assistant_OrdersController extends Mage_Core_Controller_Front_Actio
             return;
         }
 
-        $storedEmail = strtolower((string) $order->getCustomerEmail());
-        if ($storedEmail !== strtolower($email)) {
+        // Constant-time, so response timing cannot leak how much of the
+        // stored address a guess got right.
+        $storedEmail = strtolower(trim((string) $order->getCustomerEmail()));
+        if (!hash_equals($storedEmail, strtolower(trim($email)))) {
             Mage::log(
                 '[idea89-orders-lookup] email_mismatch increment_id=' . $incrementId,
                 Zend_Log::INFO,
@@ -133,10 +135,9 @@ class Idea89_Assistant_OrdersController extends Mage_Core_Controller_Front_Actio
             return;
         }
 
-        // Successful match — clear the rate-limit bucket so this user
-        // can keep tracking other orders without bumping into the cap
-        // because of earlier typos.
-        $rateLimit->reset($ip);
+        // The bucket is deliberately NOT reset on a match: anyone holding
+        // one valid order could otherwise reset it between guesses and
+        // enumerate without limit.
         Mage::log(
             '[idea89-orders-lookup] match increment_id=' . $incrementId,
             Zend_Log::INFO,

@@ -19,6 +19,7 @@ class Idea89_Assistant_Model_Config
 {
     const XML_PATH_ENABLED        = 'idea89/general/enabled';
     const XML_PATH_API_KEY        = 'idea89/general/api_key';
+    const XML_PATH_SYNC_KEY       = 'idea89/general/sync_key';
     const XML_PATH_ASSISTANT_NAME = 'idea89/general/assistant_name';
     const XML_PATH_STORE_CONTEXT  = 'idea89/general/store_context';
     const XML_PATH_API_URL        = 'idea89/advanced/api_url';
@@ -45,6 +46,20 @@ class Idea89_Assistant_Model_Config
         }
         // M1 obscure/encrypted fields are always stored as ciphertext — always decrypt.
         return (string) Mage::helper('core')->decrypt($value);
+    }
+
+    /**
+     * Optional catalog sync key from the IDEA89 dashboard, sent as
+     * X-IDEA89-Sync-Key on catalog writes. Empty when unset, in which case
+     * the header is not sent at all. Stored encrypted, like the API key.
+     */
+    public function getSyncKey(): string
+    {
+        $value = trim((string) Mage::getStoreConfig(self::XML_PATH_SYNC_KEY));
+        if ($value === '') {
+            return '';
+        }
+        return trim((string) Mage::helper('core')->decrypt($value));
     }
 
     public function getAssistantName(): string

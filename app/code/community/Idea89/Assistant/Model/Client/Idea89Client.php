@@ -72,18 +72,25 @@ class Idea89_Assistant_Model_Client_Idea89Client
     }
 
     /**
-     * Builds a configured Varien_Http_Client ready for a JSON POST.
+     * Builds a configured Varien_Http_Client ready for a JSON POST. Every
+     * caller is a /v1/catalog/* write, so the optional catalog sync key is
+     * attached here when the merchant has set one, and left off otherwise.
      */
     private function buildPostClient(string $url, string $apiKey, int $timeout): Varien_Http_Client
     {
         $client = new Varien_Http_Client($url);
         $client->setConfig(['timeout' => $timeout]);
-        $client->setHeaders([
+        $headers = [
             'Content-Type'       => 'application/json',
             'X-IDEA89-Key'       => $apiKey,
             'X-IDEA89-Domain'    => $this->domainHeader(),
             'X-IDEA89-Site-Path' => $this->sitePath(),
-        ]);
+        ];
+        $syncKey = Mage::getModel('idea89_assistant/config')->getSyncKey();
+        if ($syncKey !== '') {
+            $headers['X-IDEA89-Sync-Key'] = $syncKey;
+        }
+        $client->setHeaders($headers);
         return $client;
     }
 
