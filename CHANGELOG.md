@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-10-06
+
+### Fixed
+- **Configurable products with swatches sync again.** Swatch types were
+  sent as Magento's numbers (0, 1, 2); IDEA89 accepts only `text`, `color`
+  and `image`, so every batch with a swatch product was refused. They are
+  now sent as names. (IDEA89 also accepts the old numbers from 1.0.3 and
+  earlier.)
+
+### Added
+- **Deleted, disabled and hidden products leave the assistant.** A deleted
+  product is removed within a minute (new `catalog_product_delete_after`
+  observer); a product saved as disabled or not visible in the catalogue or
+  search is removed instead of re-sent.
+- **Attribute list with labels.** Searchable, filterable and
+  storefront-visible attributes are also sent with their store label, input
+  type, option labels and those settings (catalogue schema 2). The flat
+  attribute map is unchanged; an IDEA89 API that predates schema 2 ignores
+  the list.
+
+### Upgrade notes
+- Refresh the configuration cache after updating (System → Cache
+  Management) so the new observer is registered.
+
 ## [1.0.3] - 2026-10-01
 
 ### Changed

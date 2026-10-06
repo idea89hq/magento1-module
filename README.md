@@ -229,6 +229,15 @@ Save 10% with annual billing. All plans include the full feature set.
 
 ---
 
+## Running unit tests
+
+The unit tests need PHPUnit 10 or 11 and no OpenMage install. From the
+repository root:
+
+```bash
+woocommerce-plugin/vendor/bin/phpunit -c magento1-module/tests/phpunit.xml.dist
+```
+
 ## License
 
 This module is licensed under the [Open Software License 3.0 (OSL-3.0)](https://opensource.org/licenses/OSL-3.0).

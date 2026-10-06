@@ -70,6 +70,20 @@ class Idea89_Assistant_Model_Cron
         // Read directly from DB so we see values written by the observer in a prior
         // PHP process, not the stale Magento file-cache snapshot from app init.
         $conn = Mage::getSingleton('core/resource')->getConnection('core_write');
+
+        // Products deleted in Magento (productDeleted observer): removed from the assistant.
+        $deletedRaw = (string) $conn->fetchOne(
+            "SELECT value FROM core_config_data WHERE path = ? AND scope = 'default' LIMIT 1",
+            ['idea89/sync/pending_deleted_ids']
+        );
+        $deleted = array_values(array_filter(array_unique(explode(',', $deletedRaw))));
+        if (!empty($deleted)) {
+            Mage::getConfig()->saveConfig('idea89/sync/pending_deleted_ids', '');
+            /** @var Idea89_Assistant_Model_Client_Idea89Client $client */
+            $client = Mage::getModel('idea89_assistant/client_idea89Client');
+            $client->deleteProducts($deleted, $config->getApiKey(), $config->getApiUrl());
+        }
+
         $raw  = (string) $conn->fetchOne(
             "SELECT value FROM core_config_data WHERE path = ? AND scope = 'default' LIMIT 1",
             [self::XML_PATH_QUEUE]

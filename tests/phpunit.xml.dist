@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+    Unit tests for the Magento 1 / OpenMage module. Needs PHPUnit 10 or 11 and
+    no OpenMage install, e.g. from the repository root:
+      woocommerce-plugin/vendor/bin/phpunit -c magento1-module/tests/phpunit.xml.dist
+-->
+<phpunit bootstrap="bootstrap.php" colors="true" cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="Idea89 OpenMage Unit Tests">
+            <directory>Unit</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

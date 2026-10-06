@@ -127,7 +127,8 @@ class Idea89_Assistant_Model_Sync_CatalogSyncer
     /**
      * Sync a single product by ID — used by the drain cron after productSaved observer queues it.
      * Loads the product, serializes it, and POSTs to /v1/catalog/upsert.
-     * Skipped silently if the product doesn't exist or is not enabled+visible.
+     * A product that does not exist, is disabled or is not visible is removed
+     * from the assistant instead (1.1.0; earlier versions re-sent it).
      */
     public function syncProduct(int $productId): void
     {
@@ -140,18 +141,23 @@ class Idea89_Assistant_Model_Sync_CatalogSyncer
             return;
         }
 
+        /** @var Idea89_Assistant_Model_Client_Idea89Client $client */
+        $client = Mage::getModel('idea89_assistant/client_idea89Client');
+
         /** @var Mage_Catalog_Model_Product $product */
         $product = Mage::getModel('catalog/product')->load($productId);
-        if (!$product->getId()) {
-            Mage::log('IDEA89: syncProduct skipped — product not found id=' . $productId, Zend_Log::WARN, 'idea89.log', true);
+        // Gone, disabled, or not visible in the catalogue or search: removed
+        // from the assistant (a configurable's children live in their parent).
+        if (!$product->getId()
+            || (int) $product->getStatus() !== Mage_Catalog_Model_Product_Status::STATUS_ENABLED
+            || (int) $product->getVisibility() === Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE) {
+            $client->deleteProducts([(string) $productId], $apiKey, $apiUrl);
+            Mage::log('IDEA89: syncProduct removed id=' . $productId, Zend_Log::INFO, 'idea89.log', true);
             return;
         }
 
         /** @var Idea89_Assistant_Model_Sync_ProductSerializer $serializer */
         $serializer = Mage::getModel('idea89_assistant/sync_productSerializer');
-
-        /** @var Idea89_Assistant_Model_Client_Idea89Client $client */
-        $client = Mage::getModel('idea89_assistant/client_idea89Client');
 
         try {
             $serialized = $serializer->serialize($product);

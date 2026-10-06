@@ -26,6 +26,37 @@ declare(strict_types=1);
 class Idea89_Assistant_Model_Observer
 {
     private const XML_PATH_QUEUE = 'idea89/sync/pending_product_ids';
+    private const XML_PATH_DELETED_QUEUE = 'idea89/sync/pending_deleted_ids';
+
+    /**
+     * Queue a deleted product's removal from the assistant; the drain cron
+     * sends it within a minute.
+     *
+     * Fires on: catalog_product_delete_after
+     */
+    public function productDeleted(Varien_Event_Observer $observer): void
+    {
+        /** @var Idea89_Assistant_Model_Config $config */
+        $config = Mage::getModel('idea89_assistant/config');
+        if (!$config->isEnabled()) {
+            return;
+        }
+        $product   = $observer->getEvent()->getProduct();
+        $productId = $product ? (int) $product->getId() : 0;
+        if (!$productId) {
+            return;
+        }
+        $conn     = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $existing = (string) $conn->fetchOne(
+            "SELECT value FROM core_config_data WHERE path = ? AND scope = 'default' LIMIT 1",
+            [self::XML_PATH_DELETED_QUEUE]
+        );
+        $ids = array_filter(explode(',', $existing));
+        if (!in_array((string) $productId, $ids, true)) {
+            $ids[] = (string) $productId;
+            Mage::getConfig()->saveConfig(self::XML_PATH_DELETED_QUEUE, implode(',', $ids));
+        }
+    }
 
     /**
      * Queue a product ID for incremental sync after save.

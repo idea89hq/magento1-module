@@ -95,6 +95,9 @@ class Idea89_Assistant_Model_Sync_ProductSerializer
             // falls back to split_part on category_path which can't parse ID-joined paths.
             'category_names'  => $categoryNames,
             'attributes'      => $this->extractAttributes($product),
+            // Schema 2 (1.1.0): the same attributes, and storefront-visible
+            // ones, with labels, input types and flags.
+            'attribute_list'  => $this->extractAttributeList($product),
             'variants'        => $this->extractVariants($product),
             'avg_rating'      => $reviews['avg_rating'],
             'review_count'    => $reviews['review_count'],
@@ -277,10 +280,10 @@ class Idea89_Assistant_Model_Sync_ProductSerializer
     /**
      * Per-instance cache of swatch data keyed by option_id.
      * Null means "no swatch row exists for this option_id" (already looked up).
-     * Array means {type: int, value: string} (already resolved).
+     * Array means {type: string, value: string} (already resolved).
      * Key absent means "not yet looked up".
      *
-     * @var array<int, array{type: int, value: string}|null>
+     * @var array<int, array{type: string, value: string}|null>
      */
     private array $swatchCache = [];
 
@@ -291,12 +294,16 @@ class Idea89_Assistant_Model_Sync_ProductSerializer
      * Wrapped in try/catch — swatch failure must never abort serialization.
      *
      * Type derivation (OpenMage has no numeric type column, unlike M2):
-     *   filename non-empty               → type 2 (image swatch)
-     *   value starts with '#'            → type 1 (colour swatch)
-     *   value non-empty                  → type 0 (text swatch)
+     *   filename non-empty               → 'image'
+     *   value starts with '#'            → 'color'
+     *   value non-empty                  → 'text'
      *   otherwise                        → null  (no usable swatch)
      *
-     * @return array{type: int, value: string}|null
+     * The type is the NAME the IDEA89 API accepts, as the Magento 2 module
+     * sends it. Up to 1.0.3 this sent Magento's number (2, 1, 0), which the
+     * API refused, failing the whole batch of products it was in.
+     *
+     * @return array{type: string, value: string}|null
      */
     private function resolveSwatchForOption(int $optionId): ?array
     {
@@ -318,11 +325,11 @@ class Idea89_Assistant_Model_Sync_ProductSerializer
             $val   = (string) $swatch->getValue();
 
             if ($fname !== '') {
-                $resolved = ['type' => 2, 'value' => $fname];
+                $resolved = ['type' => 'image', 'value' => $fname];
             } elseif ($val !== '' && strpos($val, '#') === 0) {
-                $resolved = ['type' => 1, 'value' => $val];
+                $resolved = ['type' => 'color', 'value' => $val];
             } elseif ($val !== '') {
-                $resolved = ['type' => 0, 'value' => $val];
+                $resolved = ['type' => 'text', 'value' => $val];
             } else {
                 $resolved = null;
             }
@@ -341,8 +348,8 @@ class Idea89_Assistant_Model_Sync_ProductSerializer
      * M1 type instance API differs from M2: getUsedProducts(null, $product).
      *
      * Swatch data is attached per-variant under $variant['swatches'][$attrCode]
-     * as {type: int, value: string} where type 0=text, 1=colour, 2=image —
-     * matching the M2 ProductSerializer output shape exactly.
+     * as {type: string, value: string} where type is 'text', 'color' or
+     * 'image' — matching the M2 ProductSerializer output shape exactly.
      * The 'swatches' key is omitted entirely when no attribute has a swatch
      * (matches M2 behaviour; no empty array emitted).
      *
@@ -472,5 +479,84 @@ class Idea89_Assistant_Model_Sync_ProductSerializer
             // Best-effort — attribute extraction failure must not abort the sync
         }
         return $attrs;
+    }
+
+    /** Platform fields that are not facts about the product. */
+    private const SKIP_CODES = [
+        'sku', 'name', 'description', 'short_description', 'price', 'special_price', 'special_from_date',
+        'special_to_date', 'cost', 'tier_price', 'group_price', 'msrp', 'msrp_enabled', 'msrp_display_actual_price_type',
+        'image', 'small_image', 'thumbnail', 'media_gallery', 'gallery', 'image_label', 'small_image_label',
+        'thumbnail_label', 'url_key', 'url_path', 'meta_title', 'meta_keyword', 'meta_description', 'status',
+        'visibility', 'tax_class_id', 'category_ids', 'options_container', 'page_layout', 'custom_layout_update',
+        'custom_design', 'custom_design_from', 'custom_design_to', 'gift_message_available', 'news_from_date',
+        'news_to_date', 'enable_googlecheckout', 'is_recurring', 'recurring_profile', 'price_view', 'created_at', 'updated_at',
+    ];
+
+    /**
+     * Schema-2 attribute list: searchable, filterable and storefront-visible
+     * attributes with their store label, input type, display value (option
+     * labels; a list for multiselects), raw value and flags.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function extractAttributeList($product): array
+    {
+        $out = [];
+        try {
+            foreach ($product->getAttributes() as $attribute) {
+                $code = (string) $attribute->getAttributeCode();
+                if ($code === '' || in_array($code, self::SKIP_CODES, true)) {
+                    continue;
+                }
+                $visible    = (bool) $attribute->getIsVisibleOnFront();
+                $searchable = (bool) $attribute->getIsSearchable();
+                $filterable = (int) $attribute->getIsFilterable() > 0 || (int) $attribute->getIsFilterableInSearch() > 0;
+                if (!$visible && !$searchable && !$filterable) {
+                    continue;
+                }
+                $raw = $product->getData($code);
+                if ($raw === null || $raw === '' || $raw === false || $raw === []) {
+                    continue;
+                }
+                $input = (string) $attribute->getFrontendInput();
+                if (in_array($input, ['media_image', 'gallery', 'image'], true)) {
+                    continue;
+                }
+                if ($input === 'boolean') {
+                    $value = ((int) $raw) === 1 ? 'Yes' : 'No';
+                } elseif ($input === 'select' || $input === 'multiselect') {
+                    $text = $product->getAttributeText($code);
+                    if (is_array($text)) {
+                        $value = array_values(array_filter(array_map('strval', $text), function ($v) {
+                            return trim($v) !== '';
+                        }));
+                    } else {
+                        $value = ($text === false || $text === null) ? '' : (string) $text;
+                    }
+                } else {
+                    $value = is_array($raw) ? '' : trim(strip_tags((string) $raw));
+                }
+                if ($value === '' || $value === []) {
+                    continue;
+                }
+                $label = (string) $attribute->getStoreLabel();
+                if ($label === '') {
+                    $label = (string) $attribute->getFrontendLabel();
+                }
+                $out[] = [
+                    'code'       => $code,
+                    'label'      => $label !== '' ? $label : $code,
+                    'value'      => is_array($value) && count($value) === 1 ? $value[0] : $value,
+                    'raw'        => is_scalar($raw) ? $raw : null,
+                    'type'       => is_array($value) && count($value) > 1 ? 'multiselect' : ($input === 'boolean' ? 'boolean' : ($input === 'price' || $input === 'weight' ? 'number' : ($input === 'select' || $input === 'multiselect' ? 'select' : 'text'))),
+                    'filterable' => $filterable,
+                    'searchable' => $searchable,
+                    'visible'    => $visible,
+                ];
+            }
+        } catch (Exception $e) {
+            // Best-effort, like the attribute map: never abort the sync.
+        }
+        return $out;
     }
 }

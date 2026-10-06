@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Idea89_Assistant>
-            <version>1.0.3</version>
+            <version>1.1.0</version>
         </Idea89_Assistant>
     </modules>
     <global>
@@ -33,6 +33,16 @@
                     </idea89_product_saved>
                 </observers>
             </catalog_product_save_after>
+            <!-- Same model, fired on delete -->
+            <catalog_product_delete_after>
+                <observers>
+                    <idea89_product_deleted>
+                        <type>singleton</type>
+                        <class>idea89_assistant/observer</class>
+                        <method>productDeleted</method>
+                    </idea89_product_deleted>
+                </observers>
+            </catalog_product_delete_after>
             <!-- Confirmed against OpenMage src/app/code/core/Mage/CatalogInventory/Model/Stock/Item.php
                  _eventPrefix='cataloginventory_stock_item' _eventObject='item' -->
             <cataloginventory_stock_item_save_after>

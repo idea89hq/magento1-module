@@ -155,7 +155,9 @@ class Idea89_Assistant_Model_Client_Idea89Client
         }
 
         $url  = rtrim($apiUrl, '/') . '/v1/catalog/upsert';
-        $body = json_encode(['products' => $products]);
+        // Schema 2 (module 1.1.0): an IDEA89 API that predates it ignores the
+        // version, the platform and the attribute list.
+        $body = json_encode(['schema_version' => 2, 'platform' => 'magento1', 'products' => $products]);
 
         try {
             $client = $this->buildPostClient($url, $apiKey, self::BATCH_TIMEOUT);
@@ -251,6 +253,40 @@ class Idea89_Assistant_Model_Client_Idea89Client
             Mage::log('IDEA89 upsertPromos exception: ' . $e->getMessage(), Zend_Log::ERR, 'idea89.log');
             return false;
         }
+    }
+
+    /**
+     * Remove products from the assistant (deleted, disabled or no longer
+     * visible) through /v1/catalog/delete, which every IDEA89 API version
+     * accepts. At most 500 ids per request. Returns true when all succeed.
+     *
+     * @param string[] $externalIds
+     */
+    public function deleteProducts(array $externalIds, string $apiKey, string $apiUrl): bool
+    {
+        $externalIds = array_values(array_unique(array_filter(array_map('strval', $externalIds), function ($id) {
+            return $id !== '';
+        })));
+        if (empty($externalIds)) {
+            return true;
+        }
+        $ok = true;
+        foreach (array_chunk($externalIds, 500) as $chunk) {
+            try {
+                $client = $this->buildPostClient(rtrim($apiUrl, '/') . '/v1/catalog/delete', $apiKey, self::TIMEOUT);
+                $client->setRawData(json_encode(['external_ids' => $chunk]), 'application/json');
+                $resp = $client->request(Varien_Http_Client::POST);
+                if (!$resp->isSuccessful()) {
+                    Mage::log('IDEA89 deleteProducts failed: HTTP ' . $resp->getStatus(), Zend_Log::ERR, 'idea89.log');
+                    $this->noteSyncKeyRejection((int) $resp->getStatus(), (string) $resp->getBody());
+                    $ok = false;
+                }
+            } catch (Exception $e) {
+                Mage::log('IDEA89 deleteProducts exception: ' . $e->getMessage(), Zend_Log::ERR, 'idea89.log');
+                $ok = false;
+            }
+        }
+        return $ok;
     }
 
     /**
