@@ -213,6 +213,35 @@ class Idea89_Assistant_Model_Client_Idea89Client
     }
 
     /**
+     * One-time handover of the removed Brand Colour field to the IDEA89
+     * dashboard. IDEA89 uses it only while the dashboard is still on the
+     * theme's own palette, never overwriting a colour picked there. True on a
+     * confirmed 2xx, whether or not it was used: either way the dashboard now
+     * owns the colour.
+     */
+    public function seedBrandColor(string $colour, string $apiKey, string $apiUrl): bool
+    {
+        $url = rtrim($apiUrl, '/') . '/v1/plugin-settings';
+        try {
+            $client = $this->buildPostClient($url, $apiKey, self::TIMEOUT);
+            $client->setRawData(json_encode(['brand_color_seed' => $colour]), 'application/json');
+            $resp = $client->request(Varien_Http_Client::POST);
+            if (!$resp->isSuccessful()) {
+                Mage::log(
+                    'IDEA89 brand colour handover failed: HTTP ' . $resp->getStatus() . ' ' . substr((string) $resp->getBody(), 0, 500),
+                    Zend_Log::WARN,
+                    'idea89.log'
+                );
+                return false;
+            }
+            return true;
+        } catch (Exception $e) {
+            Mage::log('IDEA89 brand colour handover exception: ' . $e->getMessage(), Zend_Log::WARN, 'idea89.log');
+            return false;
+        }
+    }
+
+    /**
      * POST store-info payload (name, currency, locale etc.) to /v1/catalog/content.
      * Delegates to syncContent — same endpoint, same shape.
      * Returns true on HTTP 200/201.

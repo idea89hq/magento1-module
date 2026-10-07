@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [1.2.0] - 2026-10-07
+
+### Changed
+- The Personalization help text now says where the Signing Secret comes
+  from: create it in the IDEA89 dashboard (Settings → Widget →
+  Personalization), which can now generate it.
+- **Store details sync sends facts only:** the store name, display currency,
+  general contact email (not a placeholder such as `owner@example.com`) and
+  website. It no longer sends free text or a generated "An online store
+  selling products at …" sentence.
+
+### Removed
+- **The Brand Colour field** (System > Configuration > IDEA89 > Widget
+  Appearance). Set the colour in the IDEA89 dashboard instead, under
+  Settings > Widget, with the theme, fonts and a live preview. The module
+  printed this colour on the storefront and it silently beat the dashboard,
+  so the dashboard's picker, preview and contrast warning showed one colour
+  while shoppers saw another. After upgrading, an hourly cron job sends a
+  colour you had set here to IDEA89 once and then deletes it from Magento's
+  config. IDEA89 uses it only if the dashboard is still on the theme's own
+  palette, so shoppers keep seeing the same colour. The store locator page
+  also follows the dashboard colour now.
+- **The Store Context field** (System > Configuration > IDEA89 > General).
+  Describe your store in the IDEA89 dashboard instead, under Settings >
+  AI & Knowledge > Store context. The two fields were separate: both were
+  given to the assistant on every chat, neither screen showed the other, and
+  they could contradict each other. Text you entered here before this
+  release has been copied into the dashboard field if that was empty.
+
 ## [1.1.0] - 2026-10-06
 
 ### Fixed

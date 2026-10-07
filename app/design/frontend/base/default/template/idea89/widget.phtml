@@ -9,7 +9,6 @@ if (!$this->shouldRender()) {
     return;
 }
 ?>
-<?php $brandColor = $this->getBrandColor(); ?>
 <?php
 /**
  * Expose the live session form key to the widget as window.FORM_KEY.
@@ -30,6 +29,5 @@ window.__IDEA89_PLATFORM = 'magento1';</script>
     src="<?php echo $this->escapeUrl($this->getWidgetUrl()) ?>/widget/v1/<?php echo $this->escapeUrl($this->getApiKey()) ?>.js"
     data-key="<?php echo $this->escapeHtml($this->getApiKey()) ?>"
     data-position="<?php echo $this->escapeHtml($this->getWidgetPosition()) ?>"
-    <?php if ($brandColor !== ''): ?>data-color="<?php echo $this->escapeHtml($brandColor) ?>"<?php endif; ?>
     async
 ></script>

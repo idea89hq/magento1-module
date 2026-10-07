@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Idea89_Assistant>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
         </Idea89_Assistant>
     </modules>
     <global>
@@ -94,6 +94,11 @@
                 <schedule><cron_expr>*/15 * * * *</cron_expr></schedule>
                 <run><model>idea89_assistant/cron::syncPromos</model></run>
             </idea89_sync_promos>
+            <idea89_hand_over_brand_colour>
+                <!-- hourly; a no-op once the old Brand Colour value is handed over -->
+                <schedule><cron_expr>17 * * * *</cron_expr></schedule>
+                <run><model>idea89_assistant/brandColourHandover::run</model></run>
+            </idea89_hand_over_brand_colour>
         </jobs>
     </crontab>
     <frontend>

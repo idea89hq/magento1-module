@@ -101,16 +101,6 @@
                             <show_in_store>1</show_in_store>
                         </assistant_name>
 
-                        <store_context translate="label comment">
-                            <label>Store Context</label>
-                            <comment>Describe what your store sells so the assistant can answer general questions. E.g. "We specialise in outdoor gardening tools and accessories for home and professional gardeners."</comment>
-                            <frontend_type>textarea</frontend_type>
-                            <sort_order>40</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </store_context>
-
                         <test_connection translate="label">
                             <label>Test Connection</label>
                             <frontend_model>idea89_assistant/adminhtml_system_config_testConnectionButton</frontend_model>
@@ -134,8 +124,9 @@
                 </general>
 
                 <!-- ── Widget Appearance ────────────────────────── -->
-                <widget translate="label">
+                <widget translate="label comment">
                     <label>Widget Appearance</label>
+                    <comment>Theme, brand colour and fonts are set in your IDEA89 dashboard (Settings → Widget), with a live preview.</comment>
                     <sort_order>20</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
@@ -150,17 +141,6 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </position>
-
-                        <brand_color translate="label comment">
-                            <label>Brand Colour</label>
-                            <comment>Hex colour code, e.g. #2563eb</comment>
-                            <frontend_type>text</frontend_type>
-                            <validate>validate-color</validate>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </brand_color>
                     </fields>
                 </widget>
 
@@ -497,7 +477,7 @@
                      activate the server-side HMAC identity handshake. -->
                 <personalization translate="label comment">
                     <label>Personalization</label>
-                    <comment>When enabled, logged-in customers are identified to the assistant via a server-side HMAC token. Requires the Signing Secret from your IDEA89 merchant dashboard.</comment>
+                    <comment>When enabled, logged-in customers are identified to the assistant via a server-side HMAC token. Requires the Signing Secret from your IDEA89 dashboard (Settings → Widget → Personalization).</comment>
                     <sort_order>29</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>

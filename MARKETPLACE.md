@@ -38,7 +38,7 @@ package should look like. Not merchant-facing documentation.
 - Admin configuration under System > Configuration > IDEA89
 - Test Connection and Sync Now actions in admin
 - Encrypted API key storage using Magento's built-in encryption
-- Configurable widget position, assistant name, store context, and API URL override
+- Configurable widget position, assistant name, and API URL override (describe your store in the IDEA89 dashboard)
 
 ---
 

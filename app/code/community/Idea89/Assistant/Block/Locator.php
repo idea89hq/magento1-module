@@ -16,7 +16,7 @@ declare(strict_types=1);
  *   getMapProvider()   — 'stadia'|'google' from RemoteCfg
  *   getMapKey()        — map provider API key (nullable)
  *   getDefaultCountryCode() — ISO country code (nullable)
- *   getBrandColor()    — hex (nullable, admin override → dashboard → null)
+ *   getBrandColor()    — hex (nullable, dashboard → null)
  *   getStorefinderLayout()  — 'fullwidth'|'boxed'
  *   getNearestResultsCount() — int
  *   getLocations()     — array from /widget/v1/locations
@@ -93,15 +93,12 @@ class Idea89_Assistant_Block_Locator extends Mage_Core_Block_Template
     }
 
     /**
-     * Brand colour fallback: Magento admin override → dashboard cfg → null.
-     * Non-empty admin override wins; null means the template uses its default.
+     * The dashboard's brand colour, or null for the template's default. The
+     * colour is set in the IDEA89 dashboard only; the module's own Brand
+     * Colour field was removed.
      */
     public function getBrandColor(): ?string
     {
-        $override = $this->getConfig()->getBrandColor();
-        if ($override !== '') {
-            return $override;
-        }
         return $this->getMapCfg()['brandColor'];
     }
 

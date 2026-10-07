@@ -53,9 +53,4 @@ class Idea89_Assistant_Block_Widget extends Mage_Core_Block_Template
     {
         return $this->_config->getWidgetPosition();
     }
-
-    public function getBrandColor(): string
-    {
-        return $this->_config->getBrandColor();
-    }
 }

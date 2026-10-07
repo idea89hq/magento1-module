@@ -85,28 +85,64 @@ class Idea89_Assistant_Model_Sync_ContentSyncer
     }
 
     /**
-     * Build the store_info content item.
+     * The store_info item: plain facts about the store (name, currency,
+     * contact email, website), never free text.
+     *
+     * Merchant-written "store context" lives only in the IDEA89 dashboard
+     * (AI & Knowledge). This module used to have its own Store Context field:
+     * both reached every chat prompt, neither screen showed the other, and
+     * they could contradict each other. Sending the same external_id replaces
+     * the old row on the next sync.
      *
      * @return array<string, string>
      */
     private function buildStoreInfo(Idea89_Assistant_Model_Config $config): array
     {
-        $store         = Mage::app()->getStore();
-        $storeName     = (string) $store->getName();
-        $context       = $config->getStoreContext();
-        $assistantName = $config->getAssistantName();
+        $store = Mage::app()->getStore();
+        return self::storeInfoItem([
+            'name'     => (string) $store->getName(),
+            'currency' => (string) $store->getCurrentCurrencyCode(),
+            'email'    => $config->getGeneralContactEmail(),
+            'url'      => (string) $store->getBaseUrl(),
+        ]);
+    }
 
-        $body = trim(implode(' ', array_filter([
-            $context,
-            $context ? '' : 'An online store selling products at ' . $storeName . '.',
-            'Assistant name: ' . $assistantName . '.',
-        ])));
+    /**
+     * Pure builder, same shape as the Magento 2 module and the WooCommerce
+     * plugin. Only facts that exist are included: OpenMage ships
+     * owner@example.com placeholders, and a made-up contact address would be
+     * repeated to shoppers as fact.
+     *
+     * @param array<string, string> $facts Keys: name, currency, email, url.
+     * @return array<string, string>
+     */
+    public static function storeInfoItem(array $facts): array
+    {
+        $name  = trim(isset($facts['name']) ? $facts['name'] : '');
+        $cur   = trim(isset($facts['currency']) ? $facts['currency'] : '');
+        $email = trim(isset($facts['email']) ? $facts['email'] : '');
+        $url   = trim(isset($facts['url']) ? $facts['url'] : '');
+
+        $parts = [];
+        if ($name !== '') {
+            $parts[] = sprintf('Store name: %s.', $name);
+        }
+        if ($cur !== '') {
+            $parts[] = sprintf('Prices are shown in %s.', $cur);
+        }
+        if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL)
+            && !preg_match('/@(example\.(com|org|net)|localhost)$/i', $email)) {
+            $parts[] = sprintf('Contact email: %s.', $email);
+        }
+        if ($url !== '' && preg_match('#^https?://#i', $url)) {
+            $parts[] = sprintf('Website: %s.', rtrim($url, '/'));
+        }
 
         return [
             'type'        => 'store_info',
             'external_id' => 'store',
-            'title'       => $storeName,
-            'body'        => $body,
+            'title'       => $name !== '' ? $name : 'Store',
+            'body'        => implode(' ', $parts),
         ];
     }
 

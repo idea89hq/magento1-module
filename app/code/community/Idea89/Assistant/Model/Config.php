@@ -21,11 +21,9 @@ class Idea89_Assistant_Model_Config
     const XML_PATH_API_KEY        = 'idea89/general/api_key';
     const XML_PATH_SYNC_KEY       = 'idea89/general/sync_key';
     const XML_PATH_ASSISTANT_NAME = 'idea89/general/assistant_name';
-    const XML_PATH_STORE_CONTEXT  = 'idea89/general/store_context';
     const XML_PATH_API_URL        = 'idea89/advanced/api_url';
     const XML_PATH_WIDGET_URL     = 'idea89/advanced/widget_url';
     const XML_PATH_POSITION       = 'idea89/widget/position';
-    const XML_PATH_COLOR          = 'idea89/widget/brand_color';
     const XML_PATH_SYNC_PRODUCTS  = 'idea89/sync/sync_products';
     const XML_PATH_SYNC_CATS      = 'idea89/sync/sync_categories';
     const XML_PATH_SYNC_CMS       = 'idea89/sync/sync_cms';
@@ -68,9 +66,14 @@ class Idea89_Assistant_Model_Config
         return $name ?: 'Shopping Assistant';
     }
 
-    public function getStoreContext(): string
+    /**
+     * The store's general contact address (System > Configuration > Store
+     * Email Addresses), or '' when unset. Used only as a fact in the synced
+     * store details, never for sending mail.
+     */
+    public function getGeneralContactEmail(): string
     {
-        return (string) Mage::getStoreConfig(self::XML_PATH_STORE_CONTEXT);
+        return trim((string) Mage::getStoreConfig('trans_email/ident_general/email'));
     }
 
     public function getApiUrl(): string
@@ -94,14 +97,6 @@ class Idea89_Assistant_Model_Config
         return (string) Mage::getStoreConfig(self::XML_PATH_POSITION) ?: 'bottom-right';
     }
 
-    /**
-     * Returns the merchant-configured brand colour, or empty string when not set.
-     * Empty string signals the widget to fall back to the dashboard setting.
-     */
-    public function getBrandColor(): string
-    {
-        return (string) Mage::getStoreConfig(self::XML_PATH_COLOR);
-    }
 
     public function isSyncProducts(): bool
     {
