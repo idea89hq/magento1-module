@@ -141,6 +141,18 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </position>
+                        <integrity translate="label comment">
+                            <label>Load With Subresource Integrity</label>
+                            <comment><![CDATA[<strong>Yes</strong>: the widget loads from a fixed copy with an <code>integrity</code> hash, so the browser refuses it if it is ever altered on the way. Security scanners and PCI DSS 6.4.3 reviews look for this on every third-party script.<br/>
+Changes you make in the IDEA89 dashboard then reach your storefront within the hour, instead of within five minutes. Refresh the Magento cache to see a change at once.<br/>
+<strong>No</strong> (default): the widget always loads its latest version.]]></comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </integrity>
                     </fields>
                 </widget>
 

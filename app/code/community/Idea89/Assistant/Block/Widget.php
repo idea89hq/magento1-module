@@ -18,6 +18,9 @@ class Idea89_Assistant_Block_Widget extends Mage_Core_Block_Template
     /** @var Idea89_Assistant_Model_Config */
     protected $_config;
 
+    /** @var Idea89_Assistant_Model_WidgetPin */
+    protected $_widgetPin;
+
     /**
      * Cache the Config model so every getter doesn't re-instantiate it.
      * _construct() is called by the parent framework after __construct(); no
@@ -27,6 +30,7 @@ class Idea89_Assistant_Block_Widget extends Mage_Core_Block_Template
     {
         parent::_construct();
         $this->_config = Mage::getModel('idea89_assistant/config');
+        $this->_widgetPin = Mage::getModel('idea89_assistant/widgetPin');
     }
 
     public function shouldRender(): bool
@@ -52,5 +56,25 @@ class Idea89_Assistant_Block_Widget extends Mage_Core_Block_Template
     public function getWidgetPosition(): string
     {
         return $this->_config->getWidgetPosition();
+    }
+
+    /**
+     * The widget script's src, and its Subresource Integrity hash when the store
+     * loads a pinned copy (Model/WidgetPin). Without a pin, the rolling URL and
+     * no hash, as before.
+     *
+     * @return array{src: string, integrity: string|null}
+     */
+    public function getWidgetScript(): array
+    {
+        $pin = $this->_widgetPin ? $this->_widgetPin->get() : null;
+        if ($pin !== null) {
+            return $pin;
+        }
+
+        return [
+            'src' => $this->getWidgetUrl() . '/widget/v1/' . rawurlencode($this->getApiKey()) . '.js',
+            'integrity' => null,
+        ];
     }
 }

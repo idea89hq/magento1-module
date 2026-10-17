@@ -25,8 +25,13 @@ if (!$this->shouldRender()) {
 ?>
 <script type="text/javascript">window.FORM_KEY = '<?php echo Mage::helper('core')->jsQuoteEscape($this->getFormKey()) ?>';
 window.__IDEA89_PLATFORM = 'magento1';</script>
+<?php $widgetScript = $this->getWidgetScript(); ?>
 <script
-    src="<?php echo $this->escapeUrl($this->getWidgetUrl()) ?>/widget/v1/<?php echo $this->escapeUrl($this->getApiKey()) ?>.js"
+    src="<?php echo $this->escapeUrl($widgetScript['src']) ?>"
+    <?php if ($widgetScript['integrity'] !== null): ?>
+    integrity="<?php echo $this->escapeHtml($widgetScript['integrity']) ?>"
+    crossorigin="anonymous"
+    <?php endif; ?>
     data-key="<?php echo $this->escapeHtml($this->getApiKey()) ?>"
     data-position="<?php echo $this->escapeHtml($this->getWidgetPosition()) ?>"
     async

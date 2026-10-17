@@ -24,6 +24,7 @@ class Idea89_Assistant_Model_Config
     const XML_PATH_API_URL        = 'idea89/advanced/api_url';
     const XML_PATH_WIDGET_URL     = 'idea89/advanced/widget_url';
     const XML_PATH_POSITION       = 'idea89/widget/position';
+    const XML_PATH_INTEGRITY      = 'idea89/widget/integrity';
     const XML_PATH_SYNC_PRODUCTS  = 'idea89/sync/sync_products';
     const XML_PATH_SYNC_CATS      = 'idea89/sync/sync_categories';
     const XML_PATH_SYNC_CMS       = 'idea89/sync/sync_cms';
@@ -95,6 +96,16 @@ class Idea89_Assistant_Model_Config
     public function getWidgetPosition(): string
     {
         return (string) Mage::getStoreConfig(self::XML_PATH_POSITION) ?: 'bottom-right';
+    }
+
+    /**
+     * Load the widget from a pinned, content-addressed URL with Subresource
+     * Integrity (Model/WidgetPin). Off by default: a pinned storefront picks up
+     * dashboard changes when its block cache refreshes, not within minutes.
+     */
+    public function isWidgetIntegrityEnabled(): bool
+    {
+        return (bool) Mage::getStoreConfigFlag(self::XML_PATH_INTEGRITY);
     }
 
 
