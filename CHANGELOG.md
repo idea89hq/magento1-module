@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-26
+
+### Added
+- **Product image gallery for the chat.** `GET /idea89/product/gallery?id=` (or `?sku=`)
+  returns a product's enabled gallery images, at most 12, with the same gates as
+  the mini product page. The chat asks for it only when a shopper presses a
+  card's enlarge button; public caching for five minutes.
+
 ## [1.3.0] - 2026-10-17
 
 ### Added

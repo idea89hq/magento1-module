@@ -147,4 +147,77 @@ class Idea89_Assistant_ProductController extends Mage_Core_Controller_Front_Acti
 
         $this->renderLayout();
     }
+
+    /**
+     * GET idea89/product/gallery?id=<entity_id>  (or ?sku=<sku>)
+     *
+     * A product's image gallery, for the chat's image viewer, which asks for
+     * it only when a shopper presses the enlarge button on a product card.
+     * Returns {images: [{url, label}]}: the enabled gallery images in the
+     * merchant's order, at most 12. Same gates as miniAction (module enabled,
+     * visible in the site, assigned to this website), so a guessed id of a
+     * hidden product answers 404. The same contract as the Magento 2 module
+     * and the WooCommerce plugin.
+     */
+    public function galleryAction()
+    {
+        $response = $this->getResponse();
+        $response->setHeader('Content-Type', 'application/json', true);
+        $notFound = function () use ($response) {
+            $response->setHttpResponseCode(404)->setBody(json_encode(array('error' => 'not_found')));
+        };
+
+        /** @var Idea89_Assistant_Model_Config $config */
+        $config = Mage::getModel('idea89_assistant/config');
+        if (!$config->isEnabled()) {
+            $notFound();
+            return;
+        }
+
+        $id = trim((string) $this->getRequest()->getParam('id'));
+        $sku = trim((string) $this->getRequest()->getParam('sku'));
+        $store = Mage::app()->getStore();
+
+        try {
+            if ($id !== '' && ctype_digit($id)) {
+                $productId = (int) $id;
+            } elseif ($sku !== '') {
+                $productId = (int) Mage::getResourceModel('catalog/product')->getIdBySku($sku);
+            } else {
+                $productId = 0;
+            }
+            $product = $productId
+                ? Mage::getModel('catalog/product')->setStoreId((int) $store->getId())->load($productId)
+                : null;
+        } catch (Exception $e) {
+            $product = null;
+        }
+
+        if (!$product || !$product->getId() || !$product->isVisibleInSiteVisibility()
+            || !in_array((int) $store->getWebsiteId(), array_map('intval', (array) $product->getWebsiteIds()), true)) {
+            $notFound();
+            return;
+        }
+
+        $images = array();
+        foreach ($product->getMediaGalleryImages() as $image) {
+            if (count($images) >= 12) {
+                break;
+            }
+            $file = (string) $image->getFile();
+            if ($file === '' || $image->getDisabled()) {
+                continue;
+            }
+            try {
+                $url = (string) Mage::helper('catalog/image')->init($product, 'image', $file)->resize(1000);
+            } catch (Exception $e) {
+                continue;
+            }
+            $images[] = array('url' => $url, 'label' => trim((string) $image->getLabel()));
+        }
+
+        // Read-only and the same for every shopper: short public caching.
+        $response->setHeader('Cache-Control', 'public, max-age=300', true);
+        $response->setBody(json_encode(array('images' => $images)));
+    }
 }
